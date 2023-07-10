@@ -1,0 +1,14 @@
+// THIS FILE IS AUTO-GENERATED
+
+Layer0
+{
+	shader "shaders/goback.shader"
+
+	//---- Bayer Matrix ----
+	TextureBayer "materials/pattern2_bayer.png"
+
+	//---- Go Back Settings ----
+	g_ColorDepth "6"
+	g_DitherScale "8"
+	g_vInternalResolution "[320 240]"
+}

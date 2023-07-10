@@ -24,6 +24,7 @@ public partial class Player : AnimatedEntity
 		Components.Create<AirMoveMechanic>();
 		Components.Create<JumpMechanic>();
 		_light = new PointLightEntity();
+		_light.Color = Color.FromRgb( 0xEBDEAB );
 	}
 
 	public override void Simulate( IClient cl )

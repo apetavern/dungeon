@@ -10,7 +10,6 @@ partial class DungeonGame
 		{
 			Map = new();
 			Map.Build( 16, 16 );
-			Map.NeedsUpdate = true;
 		}
 	}
 }
