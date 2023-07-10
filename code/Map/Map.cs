@@ -35,14 +35,13 @@ public partial class Map : Entity
 				if ( !isFloor )
 				{
 					cell.Model = Model.Load( WallPath );
-					cell.RenderColor = Color.FromRgb( 0x335D92 );
-					cell.SetupPhysicsFromModel( PhysicsMotionType.Static );
 				}
 				else
 				{
 					cell.Model = Model.Load( FloorPath );
 				}
 
+				cell.SetupPhysicsFromModel( PhysicsMotionType.Static );
 				Cells.Add( cell );
 			}
 		}

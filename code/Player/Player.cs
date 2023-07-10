@@ -31,7 +31,7 @@ public partial class Player : AnimatedEntity
 	{
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
-		if(Game.IsServer)
+		if ( Game.IsServer )
 			_light.Position = EyePosition;
 	}
 
@@ -42,7 +42,7 @@ public partial class Player : AnimatedEntity
 
 		Camera.Position = EyePosition;
 		Camera.Rotation = EyeRotation;
-		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( Game.Preferences.FieldOfView );
+		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );
 		Camera.FirstPersonViewer = this;
 		Camera.ZNear = 0.5f;
 	}
