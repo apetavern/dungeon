@@ -4,6 +4,21 @@ public partial class DungeonGame : GameManager
 {
 	public DungeonGame()
 	{
+		if ( Game.IsServer )
+		{
+			SetupMap();
+
+			var ent = new ModelEntity( "models/dev/plane.vmdl" );
+			ent.EnableDrawing = false;
+			ent.Position = Vector3.Down * Cell.CellSize / 2;
+			float size = 10000;
+			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
+		}
+	}
+
+	public override void ClientSpawn()
+	{
+		base.ClientSpawn();
 	}
 
 	public override void ClientJoined( IClient client )
@@ -22,5 +37,21 @@ public partial class DungeonGame : GameManager
 			tx.Position = tx.Position + Vector3.Up * 50.0f; // raise it up
 			pawn.Transform = tx;
 		}
+	}
+
+	[ConCmd.Admin( "noclip" )]
+	private static void Noclip()
+	{
+		if ( ConsoleSystem.Caller.Pawn is not Player player )
+			return;
+
+		if ( player.Controller.TryGetMechanic<NoclipMechanic>( out var noclip ) )
+		{
+			noclip.Enabled = !noclip.Enabled;
+			return;
+		}
+
+		var nc = new NoclipMechanic { Enabled = true };
+		player.Components.Add( nc );
 	}
 }

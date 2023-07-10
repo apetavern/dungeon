@@ -75,7 +75,7 @@ public class WalkMechanic : PlayerControllerMechanic
 				return;
 			}
 
-			var dest = ( ctrl.Position + ctrl.Velocity * Time.Delta ).WithZ( ctrl.Position.z );
+			var dest = (ctrl.Position + ctrl.Velocity * Time.Delta).WithZ( ctrl.Position.z );
 			var pm = ctrl.TraceBBox( ctrl.Position, dest );
 
 			if ( pm.Fraction == 1 )

@@ -17,9 +17,9 @@
     "MaxPlayers": 64,
     "MinPlayers": 1,
     "GameNetworkType": "Multiplayer",
-    "MapSelect": "Unrestricted",
+    "MapSelect": "Hidden",
     "MapList": [
-      "facepunch.flatgrass"
+      "null.dungeonmap"
     ],
     "RankType": "None",
     "PerMapRanking": false,
