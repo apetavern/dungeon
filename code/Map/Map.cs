@@ -5,6 +5,7 @@ public partial class Map : Entity
 	[Net] public IList<Cell> Cells { get; private set; }
 	[Net] public int Width { get; private set; }
 	[Net] public int Depth { get; private set; }
+	public Transform? PlayerSpawn { get; private set; }
 
 	const string WallPath = "models/wall.vmdl";
 	const string FloorPath = "models/floor.vmdl";
@@ -19,6 +20,7 @@ public partial class Map : Entity
 	{
 		Width = width;
 		Depth = depth;
+		var foundSpawn = false;
 
 		for ( int x = 0; x < width; ++x )
 		{
@@ -39,12 +41,17 @@ public partial class Map : Entity
 				else
 				{
 					cell.Model = Model.Load( FloorPath );
+					if ( Game.Random.Next( width ) == 2 && !foundSpawn )
+					{
+						foundSpawn = true;
+						PlayerSpawn = new Transform( cell.Position, Rotation.Identity );
+					}
+
 				}
 
 				cell.SetupPhysicsFromModel( PhysicsMotionType.Static );
 				Cells.Add( cell );
 			}
 		}
-
 	}
 }

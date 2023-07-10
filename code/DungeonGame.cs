@@ -28,15 +28,9 @@ public partial class DungeonGame : GameManager
 		var pawn = new Player();
 		client.Pawn = pawn;
 
-		var spawnpoints = Entity.All.OfType<SpawnPoint>();
-		var randomSpawnPoint = spawnpoints.OrderBy( x => Guid.NewGuid() ).FirstOrDefault();
-
-		if ( randomSpawnPoint != null )
-		{
-			var tx = randomSpawnPoint.Transform;
-			tx.Position = tx.Position + Vector3.Up * 50.0f; // raise it up
-			pawn.Transform = tx;
-		}
+		var spawnpoint = Map.PlayerSpawn ?? new Transform( Vector3.One.WithZ( 64 ), Rotation.Identity );
+		var tx = spawnpoint.WithPosition( spawnpoint.Position + Vector3.Up * 1.5f );
+		pawn.Transform = spawnpoint;
 	}
 
 	[ConCmd.Admin( "noclip" )]
