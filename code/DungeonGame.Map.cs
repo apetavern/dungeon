@@ -20,7 +20,7 @@ partial class DungeonGame
 	[GameEvent.Tick]
 	void OnTick()
 	{
-		if ( !Map.IsValid() )
+		if ( Map is null )
 			return;
 
 		Map.OnTick();
@@ -29,7 +29,7 @@ partial class DungeonGame
 	[GameEvent.Client.Frame]
 	void OnFrame()
 	{
-		if ( !Map.IsValid() )
+		if ( Map is null )
 			return;
 
 		Map.OnFrame();

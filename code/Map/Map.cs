@@ -1,24 +1,20 @@
 ﻿namespace Dungeon;
 
-public partial class Map : Entity
+public partial class Map : BaseNetworkable, INetworkSerializer
 {
 	public static float CellSize = 128f;
 
-	[Net] public int Seed { get; private set; }
-	[Net] public int Width { get; set; }
-	[Net] public int Depth { get; set; }
-	[Net] public ModelEntity MapModelEntity { get; private set; }
-	[Net] public bool NeedsUpdate { get; set; }
+	public int Seed { get; private set; }
+	public int Width { get; set; }
+	public int Depth { get; set; }
+	public bool NeedsUpdate { get; set; }
 	public List<Cell> Cells { get; private set; }
 
-	public override void Spawn()
-	{
-		base.Spawn();
-		Transmit = TransmitType.Always;
-	}
+	private bool _builtOnClient = false;
 
 	public void Build()
 	{
+		Game.AssertServer();
 		if ( Game.IsClient )
 			return;
 
@@ -26,16 +22,14 @@ public partial class Map : Entity
 		SetupCells();
 	}
 
-	public override void ClientSpawn()
+	public void BuildClient()
 	{
-		base.ClientSpawn();
-
+		Game.AssertClient();
 		var (mesh, verts, indices) = SetupMesh();
 		var model = Model.Builder.AddMesh( mesh ).Create();
 
-		MapModelEntity = new ModelEntity();
-
 		SetupCells();
+		_builtOnClient = true;
 	}
 
 	private void SetupCells()
@@ -173,8 +167,12 @@ public partial class Map : Entity
 			foreach ( var c in Cells )
 				UpdateCell( c, !c.IsFloor );
 
+
 			if ( Game.IsServer )
+			{
+				WriteNetworkData();
 				ClearUpdate();
+			}
 		}
 
 		if ( Game.IsClient )
@@ -189,8 +187,8 @@ public partial class Map : Entity
 
 	public void OnFrame()
 	{
-		//if ( !MapModelEntity.IsValid() )
-		//	return;
+		if ( !_builtOnClient )
+			BuildClient();
 
 		DebugOverlay.Text( "Map", default );
 		foreach ( var c in Cells )
@@ -203,7 +201,8 @@ public partial class Map : Entity
 
 	private async void ClearUpdate()
 	{
-		await GameTask.Delay( 100 );
+		// We love hacks.
+		await GameTask.Delay( 2 );
 		NeedsUpdate = false;
 	}
 
@@ -214,5 +213,42 @@ public partial class Map : Entity
 			x = Vector3.Dot( uAxis, pos ),
 			y = Vector3.Dot( vAxis, pos )
 		};
+	}
+
+	public void Read( ref NetRead net )
+	{
+		var cellCount = net.Read<int>();
+		Cells = new( cellCount );
+		for ( int i = 0; i < cellCount; i++ )
+		{
+			var cell = new Cell
+			{
+				Position = net.Read<Vector3>(),
+				IsFloor = net.Read<bool>(),
+			};
+
+			Cells.Add( cell );
+		}
+
+		Seed = net.Read<int>();
+		Width = net.Read<int>();
+		Depth = net.Read<int>();
+
+		NeedsUpdate = net.Read<bool>();
+	}
+
+	public void Write( NetWrite net )
+	{
+		net.Write( Cells.Count );
+		foreach ( var c in Cells )
+		{
+			net.Write( c.Position );
+			net.Write( c.IsFloor );
+		}
+
+		net.Write( Seed );
+		net.Write( Width );
+		net.Write( Depth );
+		net.Write( NeedsUpdate );
 	}
 }
