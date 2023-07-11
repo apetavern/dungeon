@@ -35,12 +35,6 @@ public partial class DungeonGame : GameManager
 		pawn.Transform = spawnpoint;
 	}
 
-	[ConCmd.Admin]
-	private static void DeleteRandomCell()
-	{
-		Instance.Map.DeleteRandomCell();
-	}
-
 	[ConCmd.Admin( "noclip" )]
 	private static void Noclip()
 	{

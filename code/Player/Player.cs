@@ -34,13 +34,14 @@ public partial class Player : AnimatedEntity
 		if ( Game.IsServer )
 			_light.Position = EyePosition;
 
-		if(Game.IsServer && Input.Released("attack1"))
+		if ( Game.IsServer && Input.Released( "attack1" ) )
 		{
 			var tr = Trace.Ray( AimRay, 200 ).Run();
-			DebugOverlay.TraceResult( tr, 20 );
-			Log.Info( tr.Body );
+			if ( tr.Body is null )
+				return;
+
 			var cell = Map.Current.GetCellFromBody( tr.Body );
-			Map.Current.DeleteCell( cell );
+			Map.Current.DeleteWall( cell );
 		}
 	}
 

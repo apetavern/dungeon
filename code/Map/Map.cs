@@ -16,8 +16,8 @@ public partial class Map
 
 	private bool _needsTransmit;
 
-	public const string WallPath = "models/wall.vmdl";
-	public const string FloorPath = "models/floor.vmdl";
+	static Model WallModel = Model.Load( "models/wall.vmdl" );
+	static Model FloorModel = Model.Load( "models/floor.vmdl" );
 
 	public Map( int w, int d )
 	{
@@ -50,16 +50,6 @@ public partial class Map
 
 			RebuildClient( To.Everyone, stream.GetBuffer(), false );
 		}
-	}
-
-	public void DeleteRandomCell()
-	{
-		Game.AssertServer();
-		if ( Game.IsClient )
-			return;
-
-		var index = Game.Random.Next( 0, Cells.Count );
-		DeleteCell( index );
 	}
 
 	private void SetupCells()
@@ -108,14 +98,14 @@ public partial class Map
 		return Cells.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
-	public void DeleteCell( Cell cell )
+	public void DeleteWall( Cell cell )
 	{
 		Game.AssertServer();
 		var index = Current.Cells.IndexOf( cell );
-		DeleteCell( index );
+		DeleteWall( index );
 	}
 
-	public void DeleteCell( int index )
+	public void DeleteWall( int index )
 	{
 		Game.AssertServer();
 
@@ -125,14 +115,13 @@ public partial class Map
 		if ( cell.IsWall )
 			cell.Collider.Enabled = false;
 
-		DeleteCellClient( To.Everyone, index );
+		DeleteWallClient( To.Everyone, index );
 	}
 
 	[ClientRpc]
-	public static void DeleteCellClient( int index )
+	public static void DeleteWallClient( int index )
 	{
 		var cell = Current.Cells[index];
-		DebugOverlay.Sphere( cell.Position, 50, Color.Random, 20, depthTest: false );
 
 		if ( cell.IsWall )
 		{
@@ -140,7 +129,7 @@ public partial class Map
 			cell.Collider.Enabled = false;
 		}
 
-		cell.Model.RenderingEnabled = false;
+		cell.Model.Model = FloorModel;
 	}
 
 	[GameEvent.Tick]
@@ -154,15 +143,6 @@ public partial class Map
 			TransmitToClient();
 			_needsTransmit = false;
 		}
-
-		foreach ( var c in Cells )
-		{
-			if ( c.Collider.IsValid() && c.Collider.Enabled )
-			{
-				DebugOverlay.Sphere( c.Position, 5, Color.Red, depthTest: false );
-			}
-		}
-
 	}
 
 	[GameEvent.Client.Frame]
@@ -170,13 +150,6 @@ public partial class Map
 	{
 		if ( Cells is null )
 			return;
-
-		DebugOverlay.Text( "Map", default );
-		foreach ( var c in Cells )
-		{
-			if ( c.IsWall && c.Collider.Enabled )
-				DebugOverlay.Box( c.Collider.GetBounds(), Color.White );
-		}
 	}
 
 	[ClientRpc]
@@ -199,7 +172,7 @@ public partial class Map
 				{
 					Position = position,
 					IsWall = isWall,
-					Model = new SceneObject( Game.SceneWorld, isWall ? Model.Load( WallPath ) : Model.Load( FloorPath ), new Transform( position, Rotation.Identity ) )
+					Model = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
 				};
 
 				if ( isWall )

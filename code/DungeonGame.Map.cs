@@ -6,6 +6,6 @@ partial class DungeonGame
 
 	public void SetupMap()
 	{
-		Map = new( 16, 16 );
+		Map = new( 32, 32 );
 	}
 }
