@@ -4,13 +4,14 @@ public partial class DungeonGame : GameManager
 {
 	public DungeonGame()
 	{
+		SetupMap();
+
 		if ( Game.IsServer )
 		{
-			SetupMap();
 
 			var ent = new ModelEntity( "models/dev/plane.vmdl" );
 			ent.EnableDrawing = false;
-			ent.Position = Vector3.Down * Cell.CellSize / 2;
+			ent.Position = Vector3.Down * Map.CellSize / 2;
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 		}

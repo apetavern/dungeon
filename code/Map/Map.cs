@@ -1,42 +1,53 @@
-﻿using System.ComponentModel;
-using System.Diagnostics;
-
-namespace Dungeon;
+﻿namespace Dungeon;
 
 public partial class Map : Entity
 {
-	[Net, HideInEditor] public IList<Cell> Cells { get; private set; }
-	[Net] public int Width { get; private set; }
-	[Net] public int Depth { get; private set; }
+	public static float CellSize = 128f;
+
+	[Net] public int Seed { get; private set; }
+	[Net] public int Width { get; set; }
+	[Net] public int Depth { get; set; }
 	[Net] public ModelEntity MapModelEntity { get; private set; }
 	[Net] public bool NeedsUpdate { get; set; }
+	public List<Cell> Cells { get; private set; }
 
 	public override void Spawn()
 	{
 		base.Spawn();
 		Transmit = TransmitType.Always;
-		MapModelEntity = new ModelEntity();
+	}
+
+	public void Build()
+	{
+		if ( Game.IsClient )
+			return;
+
+		Seed = Game.Random.Next();
+		SetupCells();
 	}
 
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
+
 		var (mesh, verts, indices) = SetupMesh();
 		var model = Model.Builder.AddMesh( mesh ).Create();
-		MapModelEntity.Model = model;
+
+		MapModelEntity = new ModelEntity();
+
+		SetupCells();
 	}
 
-	public void Build( int width, int depth )
+	private void SetupCells()
 	{
-		Width = width;
-		Depth = depth;
-
-		for ( int x = 0; x < width; ++x )
+		Cells = new();
+		Game.SetRandomSeed( Seed );
+		for ( int x = 0; x < Width; ++x )
 		{
-			for ( int y = 0; y < depth; ++y )
+			for ( int y = 0; y < Depth; ++y )
 			{
 				var isFloor = Game.Random.Next( 3 ) == 1;
-				var cellPos = new Vector3( x * Cell.CellSize, y * Cell.CellSize, 0 );
+				var cellPos = new Vector3( x * CellSize, y * CellSize, 0 );
 				var cell = new Cell
 				{
 					Position = cellPos,
@@ -46,8 +57,6 @@ public partial class Map : Entity
 				Cells.Add( cell );
 			}
 		}
-
-		NeedsUpdate = true;
 	}
 
 	public void UpdateCell( Cell c, bool collision = true )
@@ -55,14 +64,17 @@ public partial class Map : Entity
 		if ( !collision )
 			return;
 
+		if ( c.Collider.IsValid() )
+			c.Collider.Remove();
+
 		c.Collider = new PhysicsBody( Game.PhysicsWorld )
 		{
-			Position = c.Position / 8,
+			Position = c.Position / 12,
 			BodyType = PhysicsBodyType.Static,
 			GravityEnabled = false,
 		};
 
-		c.Collider.AddBoxShape( c.Position, Rotation.Identity, (Vector3.One * 0.5f) * Cell.CellSize  );
+		c.Collider.AddBoxShape( c.Position, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
 	}
 
 	private (Mesh, List<SimpleVertex>, List<int>) SetupMesh()
@@ -102,19 +114,19 @@ public partial class Map : Entity
 
 		var positions = new Vector3[]
 		{
-				new Vector3(-0.5f, -0.5f, 0.5f) * Cell.CellSize,
-				new Vector3(-0.5f, 0.5f, 0.5f) * Cell.CellSize,
-				new Vector3(0.5f, 0.5f, 0.5f) * Cell.CellSize,
-				new Vector3(0.5f, -0.5f, 0.5f) * Cell.CellSize,
-				new Vector3(-0.5f, -0.5f, -0.5f) * Cell.CellSize,
-				new Vector3(-0.5f, 0.5f, -0.5f) * Cell.CellSize,
-				new Vector3(0.5f, 0.5f, -0.5f) * Cell.CellSize,
-				new Vector3(0.5f, -0.5f, -0.5f) * Cell.CellSize,
+				new Vector3(-0.5f, -0.5f, 0.5f) * CellSize,
+				new Vector3(-0.5f, 0.5f, 0.5f) * CellSize,
+				new Vector3(0.5f, 0.5f, 0.5f) * CellSize,
+				new Vector3(0.5f, -0.5f, 0.5f) * CellSize,
+				new Vector3(-0.5f, -0.5f, -0.5f) * CellSize,
+				new Vector3(-0.5f, 0.5f, -0.5f) * CellSize,
+				new Vector3(0.5f, 0.5f, -0.5f) * CellSize,
+				new Vector3(0.5f, -0.5f, -0.5f) * CellSize,
 		};
 
 		List<SimpleVertex> verts = new();
 		List<int> indices = new();
-
+		Cells = new();
 		foreach ( var c in Cells )
 		{
 			if ( c.IsFloor )
@@ -154,43 +166,45 @@ public partial class Map : Entity
 		return (mesh, verts, indices);
 	}
 
-	[GameEvent.Tick]
-	void OnTick()
+	public void OnTick()
 	{
 		if ( NeedsUpdate )
 		{
 			foreach ( var c in Cells )
 				UpdateCell( c, !c.IsFloor );
-			
-			if(Game.IsServer)
-				DelayClearUpdate();
+
+			if ( Game.IsServer )
+				ClearUpdate();
 		}
-	}
 
-	private async void DelayClearUpdate()
-	{
-		await GameTask.Delay( 10 );
-		NeedsUpdate = false;
-	}
-
-	[GameEvent.Client.Frame]
-	void OnFrame()
-	{
-		if ( !MapModelEntity.IsValid() )
+		if ( Game.IsClient )
 			return;
 
-		DebugOverlay.Text( "Map", Position );
 		foreach ( var c in Cells )
 		{
-			DebugOverlay.Sphere( c.Position, 20, c.IsFloor ? Color.Green : Color.Red, depthTest: false );
+			if ( c.Collider.IsValid() )
+				DebugOverlay.Box( c.Collider.GetBounds(), Color.Red );
 		}
 	}
 
-	[Event.Hotload]
-	void OnHotload()
+	public void OnFrame()
 	{
-		if ( Game.IsServer )
-			NeedsUpdate = true;
+		//if ( !MapModelEntity.IsValid() )
+		//	return;
+
+		DebugOverlay.Text( "Map", default );
+		foreach ( var c in Cells )
+		{
+			//DebugOverlay.Sphere( c.Position, 20, c.IsFloor ? Color.Green : Color.Red, depthTest: false );
+			if ( c.Collider.IsValid() )
+				DebugOverlay.Box( c.Collider.GetBounds(), Color.White );
+		}
+	}
+
+	private async void ClearUpdate()
+	{
+		await GameTask.Delay( 100 );
+		NeedsUpdate = false;
 	}
 
 	protected static Vector2 Planar( Vector3 pos, Vector3 uAxis, Vector3 vAxis )

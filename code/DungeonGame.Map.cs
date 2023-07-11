@@ -6,11 +6,32 @@ partial class DungeonGame
 
 	public void SetupMap()
 	{
-		if(Game.IsServer)
-		{
-			Map = new();
-			Map.Build( 16, 16 );
-			Map.NeedsUpdate = true;
-		}
+		if ( Game.IsClient )
+			return;
+
+		Map = new();
+		Map.Width = 16;
+		Map.Depth = 16;
+
+		Map.Build();
+		Map.NeedsUpdate = true;
+	}
+
+	[GameEvent.Tick]
+	void OnTick()
+	{
+		if ( !Map.IsValid() )
+			return;
+
+		Map.OnTick();
+	}
+
+	[GameEvent.Client.Frame]
+	void OnFrame()
+	{
+		if ( !Map.IsValid() )
+			return;
+
+		Map.OnFrame();
 	}
 }
