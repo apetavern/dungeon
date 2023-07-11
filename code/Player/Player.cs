@@ -33,6 +33,15 @@ public partial class Player : AnimatedEntity
 		Controller?.Simulate( cl );
 		if ( Game.IsServer )
 			_light.Position = EyePosition;
+
+		if(Game.IsServer && Input.Released("attack1"))
+		{
+			var tr = Trace.Ray( AimRay, 200 ).Run();
+			DebugOverlay.TraceResult( tr, 20 );
+			Log.Info( tr.Body );
+			var cell = Map.Current.GetCellFromBody( tr.Body );
+			Map.Current.DeleteCell( cell );
+		}
 	}
 
 	public override void FrameSimulate( IClient cl )

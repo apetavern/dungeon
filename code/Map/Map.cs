@@ -1,40 +1,55 @@
-﻿namespace Dungeon;
+﻿using System.IO;
 
-public partial class Map : BaseNetworkable, INetworkSerializer
+namespace Dungeon;
+public partial class Map
 {
-	public static Map Current;
+	public static Map? Current;
 	public static float CellSize = 128f;
 
 	public int Seed { get; private set; }
 	public int Width { get; set; }
 	public int Depth { get; set; }
-	public List<Cell> Cells { get; private set; }
-	public bool NeedsUpdate { get; set; }
+	public List<Cell> Cells;
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
 	[ServerOnly] private bool _foundSpawn = false;
 
-	private bool _builtOnClient = false;
+	private bool _needsTransmit;
 
 	public const string WallPath = "models/wall.vmdl";
 	public const string FloorPath = "models/floor.vmdl";
 
-	public void Build()
+	public Map( int w, int d )
 	{
-		Game.AssertServer();
-		if ( Game.IsClient )
-			return;
+		Current = this;
+		Width = w;
+		Depth = d;
 
 		Seed = Game.Random.Next();
-		SetupCells();
+		if ( Game.IsServer )
+		{
+			SetupCells();
+			_needsTransmit = true;
+		}
 
-		Current = this;
+		Event.Register( this );
 	}
 
-	public void BuildClient()
+	public void TransmitToClient()
 	{
-		Game.AssertClient();
-		Current = this;
+		using ( var stream = new MemoryStream() )
+		using ( var writer = new BinaryWriter( stream ) )
+		{
+			writer.Write( Cells.Count );
+			for ( int i = 0; i < Cells.Count; i++ )
+			{
+				var c = Cells[i];
+				writer.Write( c.Position );
+				writer.Write( c.IsWall );
+			}
+
+			RebuildClient( To.Everyone, stream.GetBuffer(), false );
+		}
 	}
 
 	public void DeleteRandomCell()
@@ -51,22 +66,34 @@ public partial class Map : BaseNetworkable, INetworkSerializer
 	{
 		Game.SetRandomSeed( Seed );
 
-		Cells = new();
+		Cells ??= new();
 		for ( int x = 0; x < Width; ++x )
 		{
 			for ( int y = 0; y < Depth; ++y )
 			{
-				var isFloor = Game.Random.Next( 3 ) == 1;
+				var isWall = Game.Random.Next( 3 ) == 1;
 				var cellPos = new Vector3( x * CellSize, y * CellSize, 0 );
 				var cell = new Cell
 				{
 					Position = cellPos,
-					IsFloor = isFloor,
+					IsWall = isWall,
 				};
+
+				if ( isWall )
+				{
+					cell.Collider = new PhysicsBody( Game.PhysicsWorld )
+					{
+						Position = cell.Position,
+						BodyType = PhysicsBodyType.Static,
+						GravityEnabled = false,
+					};
+
+					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+				}
 
 				Cells.Add( cell );
 
-				if ( !_foundSpawn && Game.Random.Next( Width ) == 2 && isFloor )
+				if ( !_foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
 				{
 					PlayerSpawn = new Transform( cellPos, Rotation.Identity );
 					_foundSpawn = true;
@@ -75,35 +102,28 @@ public partial class Map : BaseNetworkable, INetworkSerializer
 		}
 	}
 
-	public void BuildCollsionForCell( Cell cell )
+	public Cell GetCellFromBody( PhysicsBody body )
 	{
-		if ( cell.IsFloor )
-			return;
+		// :(
+		return Cells.Where( x => x.Collider == body ).FirstOrDefault();
+	}
 
-		// Cell already has collision setup.
-		if ( cell.Collider.IsValid() )
-			return;
-
-		cell.Collider = new PhysicsBody( Game.PhysicsWorld )
-		{
-			Position = cell.Position,
-			BodyType = PhysicsBodyType.Static,
-			GravityEnabled = false,
-		};
-
-		cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+	public void DeleteCell( Cell cell )
+	{
+		Game.AssertServer();
+		var index = Current.Cells.IndexOf( cell );
+		DeleteCell( index );
 	}
 
 	public void DeleteCell( int index )
 	{
+		Game.AssertServer();
+
 		var cell = Cells[index];
 		Log.Info( $"Deleting cell: {index}" );
 
-		if ( !cell.IsFloor )
-		{
+		if ( cell.IsWall )
 			cell.Collider.Enabled = false;
-			Log.Info( cell.Collider.Enabled );
-		}
 
 		DeleteCellClient( To.Everyone, index );
 	}
@@ -112,23 +132,27 @@ public partial class Map : BaseNetworkable, INetworkSerializer
 	public static void DeleteCellClient( int index )
 	{
 		var cell = Current.Cells[index];
-		DebugOverlay.Sphere( cell.Position, 20, Color.Random, 20, depthTest: false );
+		DebugOverlay.Sphere( cell.Position, 50, Color.Random, 20, depthTest: false );
 
-		if ( !cell.IsFloor )
+		if ( cell.IsWall )
+		{
+			Log.Info( cell.Collider );
 			cell.Collider.Enabled = false;
+		}
 
 		cell.Model.RenderingEnabled = false;
 	}
 
+	[GameEvent.Tick]
 	public void OnTick()
 	{
 		if ( Game.IsClient )
 			return;
 
-		if ( NeedsUpdate )
+		if ( _needsTransmit )
 		{
-			foreach ( var c in Cells )
-				BuildCollsionForCell( c );
+			TransmitToClient();
+			_needsTransmit = false;
 		}
 
 		foreach ( var c in Cells )
@@ -139,75 +163,59 @@ public partial class Map : BaseNetworkable, INetworkSerializer
 			}
 		}
 
-		WriteNetworkData();
-		NeedsUpdate = false;
 	}
 
+	[GameEvent.Client.Frame]
 	public void OnFrame()
 	{
-		if ( !_builtOnClient )
-			BuildClient();
+		if ( Cells is null )
+			return;
 
 		DebugOverlay.Text( "Map", default );
 		foreach ( var c in Cells )
 		{
-			//DebugOverlay.Sphere( c.Position, 20, c.IsFloor ? Color.Green : Color.Red, depthTest: false );
-			if ( c.Collider.IsValid() && c.Collider.Enabled )
+			if ( c.IsWall && c.Collider.Enabled )
 				DebugOverlay.Box( c.Collider.GetBounds(), Color.White );
 		}
 	}
 
-	protected static Vector2 Planar( Vector3 pos, Vector3 uAxis, Vector3 vAxis )
+	[ClientRpc]
+	public static void RebuildClient( byte[] data, bool firstTime )
 	{
-		return new Vector2()
-		{
-			x = Vector3.Dot( uAxis, pos ),
-			y = Vector3.Dot( vAxis, pos )
-		};
-	}
+		if ( Current is null )
+			Current = new( 16, 16 );
 
-	public void Read( ref NetRead net )
-	{
-		NeedsUpdate = net.Read<bool>();
-		var cellCount = net.Read<int>();
-		Cells = new( cellCount );
-		for ( int i = 0; i < cellCount; i++ )
+		using ( var stream = new MemoryStream( data ) )
+		using ( var reader = new BinaryReader( stream ) )
 		{
-			var position = net.Read<Vector3>();
-			var IsFloor = net.Read<bool>();
-
-			var cell = new Cell
+			Current.Cells ??= new();
+			var cellCount = reader.ReadInt32();
+			for ( int i = 0; i < cellCount; i++ )
 			{
-				Position = position,
-				IsFloor = IsFloor
-			};
+				var position = reader.ReadVector3();
+				var isWall = reader.ReadBoolean();
 
-			cell.Model = new SceneObject( Game.SceneWorld, cell.IsFloor ? Model.Load( FloorPath ) :
-				Model.Load( WallPath ), new Transform( cell.Position, Rotation.Identity ) );
-			BuildCollsionForCell( cell );
-			Cells.Add( cell );
-		}
+				var cell = new Cell
+				{
+					Position = position,
+					IsWall = isWall,
+					Model = new SceneObject( Game.SceneWorld, isWall ? Model.Load( WallPath ) : Model.Load( FloorPath ), new Transform( position, Rotation.Identity ) )
+				};
 
-		Seed = net.Read<int>();
-		Width = net.Read<int>();
-		Depth = net.Read<int>();
-	}
+				if ( isWall )
+				{
+					cell.Collider = new PhysicsBody( Game.PhysicsWorld )
+					{
+						Position = cell.Position,
+						BodyType = PhysicsBodyType.Static,
+						GravityEnabled = false,
+					};
 
-	public void Write( NetWrite net )
-	{
-		net.Write( NeedsUpdate );
-		if ( NeedsUpdate )
-		{
-			net.Write( Cells.Count );
-			foreach ( var c in Cells )
-			{
-				net.Write( c.Position );
-				net.Write( c.IsFloor );
+					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+				}
+
+				Current.Cells.Add( cell );
 			}
 		}
-
-		net.Write( Seed );
-		net.Write( Width );
-		net.Write( Depth );
 	}
 }
