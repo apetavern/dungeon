@@ -1,7 +1,9 @@
 ﻿namespace Dungeon;
 
-public partial class Cell : ModelEntity
+public class Cell
 {
-	public static float CellSize = 128f;
-	[Net] public bool IsFloor { get; set; }
+	public Vector3 Position { get; set; }
+	public bool IsFloor { get; set; }
+	public SceneModel Modl { get; set; }
+	public PhysicsBody Collider { get; set; }
 }
