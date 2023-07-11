@@ -2,6 +2,7 @@
 
 public partial class DungeonGame : GameManager
 {
+	public static DungeonGame Instance => (Current as DungeonGame);
 	public DungeonGame()
 	{
 		SetupMap();
@@ -32,6 +33,12 @@ public partial class DungeonGame : GameManager
 		var spawnpoint = Map.PlayerSpawn ?? new Transform( Vector3.One.WithZ( 64 ), Rotation.Identity );
 		var tx = spawnpoint.WithPosition( spawnpoint.Position + Vector3.Up * 1.5f );
 		pawn.Transform = spawnpoint;
+	}
+
+	[ConCmd.Admin]
+	private static void DeleteRandomCell()
+	{
+		Instance.Map.DeleteRandomCell();
 	}
 
 	[ConCmd.Admin( "noclip" )]
