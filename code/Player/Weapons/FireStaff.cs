@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Dungeon;
 
-namespace Sandbox.Player.Weapons;
-internal class FireStaff
+public partial class FireStaff : EntityComponent<Player>, IWeapon
 {
+	Player Player => Entity;
+
+	public void Shoot()
+	{
+	}
 }

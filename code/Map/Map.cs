@@ -29,13 +29,12 @@ public partial class Map
 		if ( Game.IsServer )
 		{
 			SetupCells();
-			_needsTransmit = true;
 		}
 
 		Event.Register( this );
 	}
 
-	public void TransmitToClient()
+	public void TransmitToClient( To to )
 	{
 		using ( var stream = new MemoryStream() )
 		using ( var writer = new BinaryWriter( stream ) )
@@ -45,10 +44,10 @@ public partial class Map
 			{
 				var c = Cells[i];
 				writer.Write( c.Position );
-				writer.Write( c.IsWall );
+				writer.Write( (short)c.CellType );
 			}
 
-			RebuildClient( To.Everyone, stream.GetBuffer(), false );
+			ReceiveMapData( to, stream.GetBuffer() );
 		}
 	}
 
@@ -66,7 +65,7 @@ public partial class Map
 				var cell = new Cell
 				{
 					Position = cellPos,
-					IsWall = isWall,
+					CellType = isWall ? CellType.Wall : CellType.Floor,
 				};
 
 				if ( isWall )
@@ -98,38 +97,66 @@ public partial class Map
 		return Cells.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
-	public void DeleteWall( Cell cell )
+	[ServerOnly]
+	public void ChangeCell( Cell cell, CellType newType )
 	{
 		Game.AssertServer();
 		var index = Current.Cells.IndexOf( cell );
-		DeleteWall( index );
+		ChangeCell( index, newType );
 	}
 
-	public void DeleteWall( int index )
+	[ServerOnly]
+	public void ChangeCell( int index, CellType newType )
 	{
 		Game.AssertServer();
-
-		var cell = Cells[index];
-		Log.Info( $"Deleting cell: {index}" );
-
-		if ( cell.IsWall )
-			cell.Collider.Enabled = false;
-
-		DeleteWallClient( To.Everyone, index );
+		ChangeCellShared( index, newType );
+		ChangeCellClient( To.Everyone, index, newType );
 	}
 
 	[ClientRpc]
-	public static void DeleteWallClient( int index )
+	public static void ChangeCellClient( int index, CellType newType )
 	{
 		var cell = Current.Cells[index];
 
-		if ( cell.IsWall )
+		if ( cell.CellType is CellType.Wall )
 		{
 			Log.Info( cell.Collider );
 			cell.Collider.Enabled = false;
 		}
 
-		cell.Model.Model = FloorModel;
+		cell.SceneObject.Model = FloorModel;
+	}
+
+	private void ChangeCellShared( int index, CellType newType )
+	{
+		var cell = Cells[index];
+		Log.Info( $"Changing cell: {index} from {cell.CellType} to {newType}" );
+
+		if ( newType is CellType.Floor && cell.CellType is CellType.Wall )
+		{
+			cell.Collider.Enabled = false;
+		}
+
+		if ( Game.IsClient )
+		{
+			switch ( newType )
+			{
+				case CellType.None:
+					cell.SceneObject.Model = Model.Load( "error.vmdl" );
+					break;
+				case CellType.Floor:
+					cell.SceneObject.Model = FloorModel;
+					break;
+				case CellType.Wall:
+					cell.SceneObject.Model = WallModel;
+					break;
+				default:
+					cell.SceneObject.Model = FloorModel;
+					break;
+			}
+		}
+
+		cell.CellType = newType;
 	}
 
 	[GameEvent.Tick]
@@ -140,7 +167,7 @@ public partial class Map
 
 		if ( _needsTransmit )
 		{
-			TransmitToClient();
+			TransmitToClient( To.Everyone );
 			_needsTransmit = false;
 		}
 	}
@@ -153,7 +180,7 @@ public partial class Map
 	}
 
 	[ClientRpc]
-	public static void RebuildClient( byte[] data, bool firstTime )
+	public static void ReceiveMapData( byte[] data )
 	{
 		if ( Current is null )
 			Current = new( 16, 16 );
@@ -166,13 +193,14 @@ public partial class Map
 			for ( int i = 0; i < cellCount; i++ )
 			{
 				var position = reader.ReadVector3();
-				var isWall = reader.ReadBoolean();
+				var cellType = (CellType)reader.ReadInt16();
+				var isWall = cellType is CellType.Wall;
 
 				var cell = new Cell
 				{
 					Position = position,
-					IsWall = isWall,
-					Model = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
+					CellType = cellType,
+					SceneObject = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
 				};
 
 				if ( isWall )

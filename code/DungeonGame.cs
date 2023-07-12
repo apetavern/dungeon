@@ -1,20 +1,26 @@
-﻿namespace Dungeon;
+﻿using System.Runtime.Serialization;
+
+namespace Dungeon;
 
 public partial class DungeonGame : GameManager
 {
 	public static DungeonGame Instance => (Current as DungeonGame);
+	public ModelEntity TestModel;
+
 	public DungeonGame()
 	{
 		SetupMap();
 
 		if ( Game.IsServer )
 		{
-
 			var ent = new ModelEntity( "models/dev/plane.vmdl" );
 			ent.EnableDrawing = false;
 			ent.Position = Vector3.Down * Map.CellSize / 2;
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
+
+			TestModel = new ModelEntity( "models/test_cube.vmdl" );
+			TestModel.Position = Vector3.Up * 250;
 		}
 	}
 
@@ -33,6 +39,9 @@ public partial class DungeonGame : GameManager
 		var spawnpoint = Map.PlayerSpawn ?? new Transform( Vector3.One.WithZ( 64 ), Rotation.Identity );
 		var tx = spawnpoint.WithPosition( spawnpoint.Position + Vector3.Up * 1.5f );
 		pawn.Transform = spawnpoint;
+
+		if ( Map is not null )
+			Map.TransmitToClient( To.Single( client ) );
 	}
 
 	[ConCmd.Admin( "noclip" )]
