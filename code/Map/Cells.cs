@@ -1,6 +1,6 @@
 ﻿namespace Dungeon;
 
-public enum CellType
+public enum Cells
 {
 	None,
 	Floor,

@@ -1,11 +1,8 @@
-﻿using System.Runtime.Serialization;
-
-namespace Dungeon;
+﻿namespace Dungeon;
 
 public partial class DungeonGame : GameManager
 {
 	public static DungeonGame Instance => (Current as DungeonGame);
-	public ModelEntity TestModel;
 
 	public DungeonGame()
 	{
@@ -18,9 +15,6 @@ public partial class DungeonGame : GameManager
 			ent.Position = Vector3.Down * Map.CellSize / 2;
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
-
-			TestModel = new ModelEntity( "models/test_cube.vmdl" );
-			TestModel.Position = Vector3.Up * 250;
 		}
 	}
 

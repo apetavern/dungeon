@@ -4,7 +4,7 @@
   "Description": null,
   "Root": {
     "Guid": "b415c032-0016-4e67-9acd-de33464d7844",
-    "Class": "model_entity",
+    "Class": "Projectile",
     "Entities": [],
     "Components": [],
     "Keys": {
@@ -20,7 +20,21 @@
       "_scale": {
         "Value": "1"
       },
-      "_tags": {}
+      "_tags": {
+        "Value": "\u0022\u0022"
+      },
+      "Particle": {
+        "Type": "ParticleSystem",
+        "Value": "\u0022particles/fireball2.vpcf\u0022"
+      },
+      "Radius": {
+        "Type": "Single",
+        "Value": "10"
+      },
+      "DefaultMoveSpeed": {
+        "Type": "Single",
+        "Value": "7"
+      }
     }
   }
 }

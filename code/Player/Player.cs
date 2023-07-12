@@ -5,6 +5,8 @@ public partial class Player : AnimatedEntity
 	[BindComponent]
 	public PlayerController Controller { get; }
 
+	[Net] public Weapon? ActiveWeapon { get; private set; }
+
 	private PointLightEntity RPGLight { get; set; }
 
 	public override void Spawn()
@@ -24,6 +26,10 @@ public partial class Player : AnimatedEntity
 
 		RPGLight = new PointLightEntity();
 		RPGLight.Color = Color.FromRgb( 0xEBDEAB );
+
+		PrefabLibrary.TrySpawn<Weapon>( "prefabs/weapons/firestaff/firestaff.prefab", out var weapon );
+		weapon.Owner = this;
+		ActiveWeapon = weapon;
 	}
 
 	public override void ClientSpawn()
@@ -47,14 +53,17 @@ public partial class Player : AnimatedEntity
 				return;
 
 			var cell = Map.Current.GetCellFromBody( tr.Body );
-			Map.Current.ChangeCell( cell, CellType.Floor );
+			Map.Current.ChangeCell( cell, Cells.Floor );
 		}
+
+		ActiveWeapon?.Simulate( cl );
 	}
 
 	public override void FrameSimulate( IClient cl )
 	{
 		base.FrameSimulate( cl );
 		Controller?.FrameSimulate( cl );
+		ActiveWeapon?.FrameSimulate( cl );
 
 		RPGLight.Position = EyePosition;
 		Camera.Position = EyePosition;
@@ -64,9 +73,12 @@ public partial class Player : AnimatedEntity
 		Camera.ZNear = 0.5f;
 	}
 
-	[GameEvent.Tick]
-	void OnTick()
+	[GameEvent.Tick.Client]
+	void OnTickClient()
 	{
+		if ( IsLocalPawn )
+			return;
+
 		DebugOverlay.Text( "Player", Position );
 		DebugOverlay.Sphere( Position, 20, Color.White, 0, false );
 		DebugOverlay.Axis( EyePosition, EyeRotation, depthTest: false );

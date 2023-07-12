@@ -9,7 +9,7 @@ public partial class Map
 	public int Seed { get; private set; }
 	public int Width { get; set; }
 	public int Depth { get; set; }
-	public List<Cell> Cells;
+	public List<Cell> AllCells;
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
 	[ServerOnly] private bool _foundSpawn = false;
@@ -39,10 +39,10 @@ public partial class Map
 		using ( var stream = new MemoryStream() )
 		using ( var writer = new BinaryWriter( stream ) )
 		{
-			writer.Write( Cells.Count );
-			for ( int i = 0; i < Cells.Count; i++ )
+			writer.Write( AllCells.Count );
+			for ( int i = 0; i < AllCells.Count; i++ )
 			{
-				var c = Cells[i];
+				var c = AllCells[i];
 				writer.Write( c.Position );
 				writer.Write( (short)c.CellType );
 			}
@@ -55,7 +55,7 @@ public partial class Map
 	{
 		Game.SetRandomSeed( Seed );
 
-		Cells ??= new();
+		AllCells ??= new();
 		for ( int x = 0; x < Width; ++x )
 		{
 			for ( int y = 0; y < Depth; ++y )
@@ -65,7 +65,7 @@ public partial class Map
 				var cell = new Cell
 				{
 					Position = cellPos,
-					CellType = isWall ? CellType.Wall : CellType.Floor,
+					CellType = isWall ? Cells.Wall : Cells.Floor,
 				};
 
 				if ( isWall )
@@ -80,7 +80,7 @@ public partial class Map
 					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
 				}
 
-				Cells.Add( cell );
+				AllCells.Add( cell );
 
 				if ( !_foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
 				{
@@ -94,19 +94,19 @@ public partial class Map
 	public Cell GetCellFromBody( PhysicsBody body )
 	{
 		// :(
-		return Cells.Where( x => x.Collider == body ).FirstOrDefault();
+		return AllCells.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
 	[ServerOnly]
-	public void ChangeCell( Cell cell, CellType newType )
+	public void ChangeCell( Cell cell, Cells newType )
 	{
 		Game.AssertServer();
-		var index = Current.Cells.IndexOf( cell );
+		var index = Current.AllCells.IndexOf( cell );
 		ChangeCell( index, newType );
 	}
 
 	[ServerOnly]
-	public void ChangeCell( int index, CellType newType )
+	public void ChangeCell( int index, Cells newType )
 	{
 		Game.AssertServer();
 		ChangeCellShared( index, newType );
@@ -114,25 +114,24 @@ public partial class Map
 	}
 
 	[ClientRpc]
-	public static void ChangeCellClient( int index, CellType newType )
+	public static void ChangeCellClient( int index, Cells newType )
 	{
-		var cell = Current.Cells[index];
+		var cell = Current.AllCells[index];
 
-		if ( cell.CellType is CellType.Wall )
+		if ( cell.CellType is Cells.Wall && newType is Cells.Floor )
 		{
-			Log.Info( cell.Collider );
 			cell.Collider.Enabled = false;
+			cell.SceneObject.Model = FloorModel;
+			cell.CellType = Cells.Floor;
 		}
-
-		cell.SceneObject.Model = FloorModel;
 	}
 
-	private void ChangeCellShared( int index, CellType newType )
+	private void ChangeCellShared( int index, Cells newType )
 	{
-		var cell = Cells[index];
+		var cell = AllCells[index];
 		Log.Info( $"Changing cell: {index} from {cell.CellType} to {newType}" );
 
-		if ( newType is CellType.Floor && cell.CellType is CellType.Wall )
+		if ( newType is Cells.Floor && cell.CellType is Cells.Wall )
 		{
 			cell.Collider.Enabled = false;
 		}
@@ -141,13 +140,13 @@ public partial class Map
 		{
 			switch ( newType )
 			{
-				case CellType.None:
+				case Cells.None:
 					cell.SceneObject.Model = Model.Load( "error.vmdl" );
 					break;
-				case CellType.Floor:
+				case Cells.Floor:
 					cell.SceneObject.Model = FloorModel;
 					break;
-				case CellType.Wall:
+				case Cells.Wall:
 					cell.SceneObject.Model = WallModel;
 					break;
 				default:
@@ -175,7 +174,7 @@ public partial class Map
 	[GameEvent.Client.Frame]
 	public void OnFrame()
 	{
-		if ( Cells is null )
+		if ( AllCells is null )
 			return;
 	}
 
@@ -188,13 +187,13 @@ public partial class Map
 		using ( var stream = new MemoryStream( data ) )
 		using ( var reader = new BinaryReader( stream ) )
 		{
-			Current.Cells ??= new();
+			Current.AllCells ??= new();
 			var cellCount = reader.ReadInt32();
 			for ( int i = 0; i < cellCount; i++ )
 			{
 				var position = reader.ReadVector3();
-				var cellType = (CellType)reader.ReadInt16();
-				var isWall = cellType is CellType.Wall;
+				var cellType = (Cells)reader.ReadInt16();
+				var isWall = cellType is Cells.Wall;
 
 				var cell = new Cell
 				{
@@ -215,7 +214,7 @@ public partial class Map
 					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
 				}
 
-				Current.Cells.Add( cell );
+				Current.AllCells.Add( cell );
 			}
 		}
 	}

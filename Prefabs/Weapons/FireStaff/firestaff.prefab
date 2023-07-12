@@ -1,0 +1,41 @@
+{
+  "SchemaVersion": 1,
+  "Name": null,
+  "Description": null,
+  "Root": {
+    "Guid": "f7e7923a-dcc6-435c-a833-117948e04ed6",
+    "Class": "Weapon",
+    "Entities": [],
+    "Components": [
+      {
+        "Guid": "9a78f572-d2d9-42c9-aac4-b592f321a408",
+        "Class": "ShootProjectileBehaviour",
+        "Keys": {
+          "Projectile": {
+            "Type": "Prefab",
+            "Value": "\u0022prefabs/projectiles/fireball.prefab\u0022"
+          },
+          "_name": {
+            "Value": "\u0022ShootProjectileBehaviour\u0022"
+          },
+          "_tags": {}
+        }
+      }
+    ],
+    "Keys": {
+      "_name": {
+        "Value": "\u0022Firestaff\u0022"
+      },
+      "_localposition": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_localrotation": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_scale": {
+        "Value": "1"
+      },
+      "_tags": {}
+    }
+  }
+}
