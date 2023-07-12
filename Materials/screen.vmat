@@ -5,10 +5,10 @@ Layer0
 	shader "shaders/goback.shader"
 
 	//---- Bayer Matrix ----
-	TextureBayer "materials/pattern2_bayer.png"
+	TextureBayer "materials/default/default_noise.tga"
 
 	//---- Go Back Settings ----
-	g_ColorDepth "6"
-	g_DitherScale "8"
+	g_ColorDepth "7"
+	g_DitherScale "7"
 	g_vInternalResolution "[320 240]"
 }

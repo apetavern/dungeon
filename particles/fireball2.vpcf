@@ -531,7 +531,6 @@
 					m_vDomainMaxs = [ 0.0, 0.0 ]
 				}
 			}
-			m_bCastShadows = true
 			m_flRadiusMultiplier = 
 			{
 				m_nType = "PF_TYPE_LITERAL"

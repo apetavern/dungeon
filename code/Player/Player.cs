@@ -2,12 +2,15 @@
 
 public partial class Player : AnimatedEntity
 {
+	[ClientOnly]
+	public static Player Local = (Game.LocalPawn as Player);
+
 	[BindComponent]
 	public PlayerController Controller { get; }
 
 	[Net] public Weapon? ActiveWeapon { get; private set; }
 
-	private PointLightEntity RPGLight { get; set; }
+	private PointLightEntity? RPGLight { get; set; }
 
 	public override void Spawn()
 	{
@@ -35,13 +38,15 @@ public partial class Player : AnimatedEntity
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
+
+		RPGLight = new PointLightEntity();
+		RPGLight.Color = Color.FromRgb( 0xEBDEAB );
 	}
 
 	public override void Simulate( IClient cl )
 	{
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
-		//RPGLight.Position = EyePosition;
 
 		if ( Game.IsServer && Input.Down( "attack1" ) )
 		{
@@ -59,10 +64,14 @@ public partial class Player : AnimatedEntity
 	public override void FrameSimulate( IClient cl )
 	{
 		base.FrameSimulate( cl );
+
 		Controller?.FrameSimulate( cl );
 		ActiveWeapon?.FrameSimulate( cl );
 
-		//RPGLight.Position = EyePosition;
+		RPGLight.LightSize = 0.2f;
+		RPGLight.Brightness = 0.5f;
+		RPGLight.Position = Position;
+
 		Camera.Position = EyePosition;
 		Camera.Rotation = EyeRotation;
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );

@@ -153,12 +153,6 @@ public partial class Map
 	{
 		if ( Game.IsClient )
 			return;
-
-		if ( _needsTransmit )
-		{
-			TransmitMapData( To.Everyone );
-			_needsTransmit = false;
-		}
 	}
 
 	[GameEvent.Client.Frame]
@@ -167,16 +161,17 @@ public partial class Map
 		if ( AllCells is null || Lights is null )
 			return;
 
+		foreach ( var cell in AllCells )
+		{
+			cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < 1350;
+		}
+
 		foreach ( var light in Lights )
 		{
-			if ( Game.LocalPawn.Position.Distance( light.Info.Position ) >= 800 )
-			{
+			if ( Player.Local.Position.Distance( light.Info.Position ) >= 800 )
 				light.Cull();
-			}
 			else
-			{
 				light.UnCull();
-			}
 		}
 	}
 
