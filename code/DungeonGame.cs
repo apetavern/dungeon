@@ -35,7 +35,7 @@ public partial class DungeonGame : GameManager
 		pawn.Transform = spawnpoint;
 
 		if ( Map is not null )
-			Map.TransmitToClient( To.Single( client ) );
+			Map.TransmitMapData( To.Single( client ) );
 	}
 
 	[ConCmd.Admin( "noclip" )]

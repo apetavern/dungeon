@@ -24,8 +24,8 @@ public partial class Player : AnimatedEntity
 		Components.Create<AirMoveMechanic>();
 		Components.Create<JumpMechanic>();
 
-		RPGLight = new PointLightEntity();
-		RPGLight.Color = Color.FromRgb( 0xEBDEAB );
+		//RPGLight = new PointLightEntity();
+		//RPGLight.Color = Color.FromRgb( 0xEBDEAB );
 
 		PrefabLibrary.TrySpawn<Weapon>( "prefabs/weapons/firestaff/firestaff.prefab", out var weapon );
 		weapon.Owner = this;
@@ -35,16 +35,13 @@ public partial class Player : AnimatedEntity
 	public override void ClientSpawn()
 	{
 		base.ClientSpawn();
-
-		RPGLight = new PointLightEntity();
-		RPGLight.Color = Color.FromRgb( 0xEBDEAB );
 	}
 
 	public override void Simulate( IClient cl )
 	{
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
-		RPGLight.Position = EyePosition;
+		//RPGLight.Position = EyePosition;
 
 		if ( Game.IsServer && Input.Down( "attack1" ) )
 		{
@@ -65,7 +62,7 @@ public partial class Player : AnimatedEntity
 		Controller?.FrameSimulate( cl );
 		ActiveWeapon?.FrameSimulate( cl );
 
-		RPGLight.Position = EyePosition;
+		//RPGLight.Position = EyePosition;
 		Camera.Position = EyePosition;
 		Camera.Rotation = EyeRotation;
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );

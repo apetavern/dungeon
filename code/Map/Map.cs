@@ -1,6 +1,5 @@
-﻿using System.IO;
+﻿namespace Dungeon;
 
-namespace Dungeon;
 public partial class Map
 {
 	public static Map? Current;
@@ -9,7 +8,9 @@ public partial class Map
 	public int Seed { get; private set; }
 	public int Width { get; set; }
 	public int Depth { get; set; }
+
 	public List<Cell> AllCells;
+	public List<LightActor> Lights;
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
 	[ServerOnly] private bool _foundSpawn = false;
@@ -34,28 +35,12 @@ public partial class Map
 		Event.Register( this );
 	}
 
-	public void TransmitToClient( To to )
-	{
-		using ( var stream = new MemoryStream() )
-		using ( var writer = new BinaryWriter( stream ) )
-		{
-			writer.Write( AllCells.Count );
-			for ( int i = 0; i < AllCells.Count; i++ )
-			{
-				var c = AllCells[i];
-				writer.Write( c.Position );
-				writer.Write( (short)c.CellType );
-			}
-
-			ReceiveMapData( to, stream.GetBuffer() );
-		}
-	}
-
 	private void SetupCells()
 	{
 		Game.SetRandomSeed( Seed );
 
 		AllCells ??= new();
+		Lights ??= new();
 		for ( int x = 0; x < Width; ++x )
 		{
 			for ( int y = 0; y < Depth; ++y )
@@ -79,6 +64,10 @@ public partial class Map
 
 					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
 				}
+				else if ( Game.Random.Next( Width ) < 3 )
+				{
+					Lights.Add( new LightActor( Game.SceneWorld, cellPos, 300, Color.FromRgb( 0xe25822 ) ) );
+				}
 
 				AllCells.Add( cell );
 
@@ -90,6 +79,7 @@ public partial class Map
 			}
 		}
 	}
+
 
 	public Cell GetCellFromBody( PhysicsBody body )
 	{
@@ -166,7 +156,7 @@ public partial class Map
 
 		if ( _needsTransmit )
 		{
-			TransmitToClient( To.Everyone );
+			TransmitMapData( To.Everyone );
 			_needsTransmit = false;
 		}
 	}
@@ -174,48 +164,21 @@ public partial class Map
 	[GameEvent.Client.Frame]
 	public void OnFrame()
 	{
-		if ( AllCells is null )
+		if ( AllCells is null || Lights is null )
 			return;
-	}
 
-	[ClientRpc]
-	public static void ReceiveMapData( byte[] data )
-	{
-		if ( Current is null )
-			Current = new( 16, 16 );
-
-		using ( var stream = new MemoryStream( data ) )
-		using ( var reader = new BinaryReader( stream ) )
+		foreach ( var light in Lights )
 		{
-			Current.AllCells ??= new();
-			var cellCount = reader.ReadInt32();
-			for ( int i = 0; i < cellCount; i++ )
+			if ( Game.LocalPawn.Position.Distance( light.Info.Position ) >= 800 )
 			{
-				var position = reader.ReadVector3();
-				var cellType = (Cells)reader.ReadInt16();
-				var isWall = cellType is Cells.Wall;
-
-				var cell = new Cell
-				{
-					Position = position,
-					CellType = cellType,
-					SceneObject = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
-				};
-
-				if ( isWall )
-				{
-					cell.Collider = new PhysicsBody( Game.PhysicsWorld )
-					{
-						Position = cell.Position,
-						BodyType = PhysicsBodyType.Static,
-						GravityEnabled = false,
-					};
-
-					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
-				}
-
-				Current.AllCells.Add( cell );
+				light.Cull();
+			}
+			else
+			{
+				light.UnCull();
 			}
 		}
 	}
+
+
 }
