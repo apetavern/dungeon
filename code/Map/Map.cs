@@ -3,7 +3,12 @@
 public partial class Map
 {
 	public static Map? Current;
+
 	public static float CellSize = 128f;
+	static Model WallModel = Model.Load( "models/wall.vmdl" );
+	static Model FloorModel = Model.Load( "models/floor.vmdl" );
+
+	public bool Initialized;
 
 	public int Seed { get; private set; }
 	public int Width { get; set; }
@@ -14,11 +19,6 @@ public partial class Map
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
 	[ServerOnly] private bool _foundSpawn = false;
-
-	private bool _needsTransmit;
-
-	static Model WallModel = Model.Load( "models/wall.vmdl" );
-	static Model FloorModel = Model.Load( "models/floor.vmdl" );
 
 	public Map( int w, int d )
 	{
@@ -160,20 +160,35 @@ public partial class Map
 	{
 		if ( AllCells is null || Lights is null )
 			return;
+			
+		// Do this because when we first spawn we wan't to cull the map at least once.
+		if(!Initialized)
+		{
+			CullPass();
+			Initialized = true;
+		}
 
+		// Don't update map culling if we aren't even moving.b
+		if ( Player.Local.MoveInput.Length == 0 )
+			return;
+
+		CullPass();
+	}
+
+	private void CullPass()
+	{
 		foreach ( var cell in AllCells )
 		{
-			cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < 1350;
+			cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < DungeonConfig.MapViewDistance;
 		}
 
 		foreach ( var light in Lights )
 		{
-			if ( Player.Local.Position.Distance( light.Info.Position ) >= 800 )
+			if ( Player.Local.Position.Distance( light.Info.Position ) >= DungeonConfig.MapLightsViewDistance )
 				light.Cull();
 			else
 				light.UnCull();
 		}
 	}
-
 
 }
