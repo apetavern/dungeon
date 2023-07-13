@@ -54,7 +54,7 @@ public partial class Player : AnimatedEntity
 				return;
 
 			var cell = Map.Current.GetCellFromBody( tr.Body );
-			Map.Current.ChangeCell( cell, Cells.Floor );
+			Map.Current.ChangeCell( cell, Tiles.Floor );
 		}
 
 		ActiveWeapon?.Simulate( cl );

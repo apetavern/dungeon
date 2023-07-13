@@ -1,6 +1,6 @@
 ﻿namespace Dungeon;
 
-public enum Cells
+public enum Tiles
 {
 	None,
 	Floor,

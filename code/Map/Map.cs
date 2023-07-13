@@ -15,7 +15,7 @@ public partial class Map
 	public int Width { get; set; }
 	public int Depth { get; set; }
 
-	public List<Cell> AllCells;
+	public List<Tile> AllCells;
 	public List<LightActor> Lights;
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
@@ -48,10 +48,10 @@ public partial class Map
 			{
 				var isWall = Game.Random.Next( 3 ) == 1;
 				var cellPos = new Vector3( x * CellSize, y * CellSize, 0 );
-				var cell = new Cell
+				var cell = new Tile
 				{
 					Position = cellPos,
-					CellType = isWall ? Cells.Wall : Cells.Floor,
+					TileType = isWall ? Tiles.Wall : Tiles.Floor,
 				};
 
 				if ( isWall )
@@ -82,14 +82,14 @@ public partial class Map
 	}
 
 
-	public Cell GetCellFromBody( PhysicsBody body )
+	public Tile GetCellFromBody( PhysicsBody body )
 	{
 		// :(
 		return AllCells.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
 	[ServerOnly]
-	public void ChangeCell( Cell cell, Cells newType )
+	public void ChangeCell( Tile cell, Tiles newType )
 	{
 		Game.AssertServer();
 		var index = Current.AllCells.IndexOf( cell );
@@ -97,7 +97,7 @@ public partial class Map
 	}
 
 	[ServerOnly]
-	public void ChangeCell( int index, Cells newType )
+	public void ChangeCell( int index, Tiles newType )
 	{
 		Game.AssertServer();
 		ChangeCellShared( index, newType );
@@ -105,24 +105,24 @@ public partial class Map
 	}
 
 	[ClientRpc]
-	public static void ChangeCellClient( int index, Cells newType )
+	public static void ChangeCellClient( int index, Tiles newType )
 	{
 		var cell = Current.AllCells[index];
 
-		if ( cell.CellType is Cells.Wall && newType is Cells.Floor )
+		if ( cell.TileType is Tiles.Wall && newType is Tiles.Floor )
 		{
 			cell.Collider.Enabled = false;
 			cell.SceneObject.Model = FloorModel;
-			cell.CellType = Cells.Floor;
+			cell.TileType = Tiles.Floor;
 		}
 	}
 
-	private void ChangeCellShared( int index, Cells newType )
+	private void ChangeCellShared( int index, Tiles newType )
 	{
 		var cell = AllCells[index];
-		Log.Info( $"Changing cell: {index} from {cell.CellType} to {newType}" );
+		Log.Info( $"Changing cell: {index} from {cell.TileType} to {newType}" );
 
-		if ( newType is Cells.Floor && cell.CellType is Cells.Wall )
+		if ( newType is Tiles.Floor && cell.TileType is Tiles.Wall )
 		{
 			cell.Collider.Enabled = false;
 		}
@@ -131,13 +131,13 @@ public partial class Map
 		{
 			switch ( newType )
 			{
-				case Cells.None:
+				case Tiles.None:
 					cell.SceneObject.Model = Model.Load( "error.vmdl" );
 					break;
-				case Cells.Floor:
+				case Tiles.Floor:
 					cell.SceneObject.Model = FloorModel;
 					break;
-				case Cells.Wall:
+				case Tiles.Wall:
 					cell.SceneObject.Model = WallModel;
 					break;
 				default:
@@ -146,7 +146,7 @@ public partial class Map
 			}
 		}
 
-		cell.CellType = newType;
+		cell.TileType = newType;
 	}
 
 	[GameEvent.Tick]

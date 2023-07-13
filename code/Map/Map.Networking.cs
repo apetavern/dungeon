@@ -15,7 +15,7 @@ partial class Map
 				{
 					var c = AllCells[i];
 					writer.Write( c.Position );
-					writer.Write( (short)c.CellType );
+					writer.Write( (short)c.TileType );
 				}
 
 				writer.Write( Lights.Count );
@@ -49,12 +49,12 @@ partial class Map
 				for ( int i = 0; i < cellCount; i++ )
 				{
 					var position = reader.ReadVector3();
-					var cellType = (Cells)reader.ReadInt16();
-					var isWall = cellType is Cells.Wall;
-					var cell = new Cell
+					var cellType = (Tiles)reader.ReadInt16();
+					var isWall = cellType is Tiles.Wall;
+					var cell = new Tile
 					{
 						Position = position,
-						CellType = cellType,
+						TileType = cellType,
 						SceneObject = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
 					};
 
