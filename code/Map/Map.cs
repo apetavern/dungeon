@@ -4,6 +4,7 @@ public partial class Map
 {
 	public static Map? Current;
 
+	public static float CellHeight => CellSize;
 	public static float CellSize = 128f;
 	static Model WallModel = Model.Load( "models/wall.vmdl" );
 	static Model FloorModel = Model.Load( "models/floor.vmdl" );

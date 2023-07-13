@@ -3,6 +3,7 @@
 [Prefab]
 public partial class Projectile : Entity
 {
+	[Prefab] public float Damage { get; set; } = 1;
 	[Prefab] public float Radius { get; set; }
 	[Prefab] public float DefaultMoveSpeed { get; set; } = 7;
 	[Prefab] public float LifeTime { get; set; } = 10;
@@ -39,6 +40,8 @@ public partial class Projectile : Entity
 		ParticleEffect?.SetPosition( 0, Position );
 		if ( Game.IsServer && tr.Hit || SinceCreated >= LifeTime )
 		{
+			tr.Entity?.TakeDamage( DamageInfo.Generic( Damage ) );
+
 			ParticleEffect?.Destroy( true );
 			Delete();
 		}

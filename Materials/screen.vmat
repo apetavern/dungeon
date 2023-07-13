@@ -9,6 +9,6 @@ Layer0
 
 	//---- Go Back Settings ----
 	g_ColorDepth "7"
-	g_DitherScale "7"
+	g_DitherScale "6"
 	g_vInternalResolution "[320 240]"
 }

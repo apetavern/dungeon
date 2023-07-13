@@ -23,6 +23,11 @@ public partial class DungeonGame : GameManager
 		base.ClientSpawn();
 	}
 
+	public override void OnVoicePlayed( IClient cl )
+	{
+		base.OnVoicePlayed( cl );
+	}
+
 	public override void ClientJoined( IClient client )
 	{
 		base.ClientJoined( client );
