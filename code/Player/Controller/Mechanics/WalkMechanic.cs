@@ -2,7 +2,7 @@
 
 public class WalkMechanic : PlayerControllerMechanic
 {
-	public override float WishSpeed { get; protected set; } = 250f;
+	public override float WishSpeed { get; protected set; } = 155f;
 
 	public static float Acceleration => 8.0f;
 	public static float GroundFriction => 8.0f;

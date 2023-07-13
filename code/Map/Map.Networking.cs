@@ -62,7 +62,7 @@ partial class Map
 					{
 						cell.Collider = new PhysicsBody( Game.PhysicsWorld )
 						{
-							Position = cell.Position,
+							Position = cell.Position + Vector3.Up * CellSize / 2,
 							BodyType = PhysicsBodyType.Static,
 							GravityEnabled = false,
 						};

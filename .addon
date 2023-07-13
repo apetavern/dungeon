@@ -62,6 +62,18 @@
           "r": "Collide"
         }
       ]
-    }
+    },
+    "LaunchConfigs": [
+      {
+        "Name": "Dungeon LAN",
+        "GameIdent": "apetavern.dungeon#local",
+        "MapName": "null.dungeonmap",
+        "MaxPlayers": 2,
+        "GameSettings": {},
+        "Addons": "",
+        "PreLaunchCommand": "sv_lan 1;",
+        "PostLaunchCommand": ""
+      }
+    ]
   }
 }

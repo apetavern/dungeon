@@ -25,10 +25,10 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 	public float CurrentGroundAngle { get; set; }
 
 	public static float BodyGirth => 32f;
-	public static float EyeHeight => 64f;
+	public const float EyeHeight = 60;
 
 	[Net, Predicted]
-	public float CurrentEyeHeight { get; set; } = 64f;
+	public float CurrentEyeHeight { get; set; } = EyeHeight;
 
 	private IEnumerable<PlayerControllerMechanic> Mechanics => Entity.Components.GetAll<PlayerControllerMechanic>( true );
 

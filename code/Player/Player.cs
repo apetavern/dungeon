@@ -25,7 +25,6 @@ public partial class Player : AnimatedEntity
 
 		Components.Create<WalkMechanic>();
 		Components.Create<AirMoveMechanic>();
-		Components.Create<JumpMechanic>();
 
 		//RPGLight = new PointLightEntity();
 		//RPGLight.Color = Color.FromRgb( 0xEBDEAB );
