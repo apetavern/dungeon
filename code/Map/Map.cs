@@ -148,8 +148,6 @@ public partial class Map
 		}
 	}
 
-
-
 	[GameEvent.Tick]
 	public void OnTick()
 	{
@@ -181,7 +179,8 @@ public partial class Map
 	{
 		foreach ( var cell in AllTiles )
 		{
-			cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < DungeonConfig.MapViewDistance;
+			if ( cell.SceneObject.IsValid() )
+				cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < DungeonConfig.MapViewDistance;
 		}
 
 		foreach ( var light in Lights )
