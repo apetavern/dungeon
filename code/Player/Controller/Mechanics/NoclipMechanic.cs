@@ -4,7 +4,7 @@ public class NoclipMechanic : PlayerControllerMechanic
 	protected override void OnActivate()
 	{
 		base.OnActivate();
-		
+
 		if ( Controller.TryGetMechanic<AirMoveMechanic>( out var am ) )
 			am.Enabled = false;
 	}
@@ -24,7 +24,7 @@ public class NoclipMechanic : PlayerControllerMechanic
 		var left = Player.MoveInput.y.Clamp( -1f, 1f );
 		var rotation = Player.EyeRotation;
 
-		var vel = ( rotation.Forward * fwd ) + ( rotation.Left * left );
+		var vel = (rotation.Forward * fwd) + (rotation.Left * left);
 
 		if ( Input.Down( "jump" ) )
 		{
@@ -38,6 +38,9 @@ public class NoclipMechanic : PlayerControllerMechanic
 
 		if ( Input.Down( "duck" ) )
 			vel *= 0.2f;
+
+		if ( Input.Down( "duck" ) && Input.AnalogMove.Length == 0 )
+			vel += Vector3.Down * 2000;
 
 		Velocity += vel * Time.Delta;
 
