@@ -59,7 +59,10 @@ public partial class Player : AnimatedEntity
 
 			var tile = Map.Current.GetTileFromBody( tr.Body );
 			if ( !tile.Flags.HasFlag( TileFlag.Unbreakable ) )
+			{
 				Map.Current.ChangeTile( tile, Tiles.Floor );
+				Particles.Create( "particles/wall_break_rocks.vpcf", tile.Position.WithZ( EyePosition.z ) );
+			}
 		}
 
 		ActiveWeapon?.Simulate( cl );
