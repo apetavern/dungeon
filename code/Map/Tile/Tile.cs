@@ -45,7 +45,7 @@ public partial class Tile : IDelete
 			{
 				tile.Collider = new PhysicsBody( Game.PhysicsWorld )
 				{
-					Position = tile.Position + Vector3.Up * 20,
+					Position = tile.Position,
 					BodyType = PhysicsBodyType.Static,
 					GravityEnabled = false,
 				};
@@ -73,6 +73,7 @@ public partial class Tile : IDelete
 
 	public void DebugDraw()
 	{
+		DebugOverlay.Axis( Position, Rotation.Identity );
 		DebugOverlay.Text( Flags.ToString(), Position );
 
 		if ( !SceneObject.IsValid() )

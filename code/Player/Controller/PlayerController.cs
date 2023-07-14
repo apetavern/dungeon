@@ -25,7 +25,7 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 	public float CurrentGroundAngle { get; set; }
 
 	public static float BodyGirth => 32f;
-	public const float EyeHeight = 60;
+	public const float EyeHeight = 40f;
 
 	[Net, Predicted]
 	public float CurrentEyeHeight { get; set; } = EyeHeight;

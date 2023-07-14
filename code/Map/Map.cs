@@ -25,6 +25,8 @@ public partial class Map
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
 	[ClientOnly] public bool Initialized;
 
+	private ModelEntity FloorPlane { get; set; }
+
 	public Map( int w, int d )
 	{
 		Current = this;
@@ -35,8 +37,12 @@ public partial class Map
 
 		if ( Game.IsServer )
 		{
+			var ent = new ModelEntity( "models/dev/plane.vmdl" );
+			ent.EnableDrawing = false;
+			//ent.Position = Vector3.Down * Map.TileSize / 2;
+			float size = 10000;
+			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 			SetupTiles();
-			//Bounds = new BBox(Vector3.One * -w,)
 		}
 
 		Event.Register( this );
@@ -71,7 +77,7 @@ public partial class Map
 			{
 				var isUnbreakable = (x <= Width && y == 0) || (x == 0 && y <= Depth) || (x <= Width && y == Depth - 1) || (x == Width - 1 && y <= Depth);
 				var isWall = Game.Random.Next( 3 ) == 1 || isUnbreakable;
-				var tilePos = new Vector3( x * TileSize, y * TileSize, 0 );
+				var tilePos = new Vector3( x * TileSize, y * TileSize, TileSize / 2 );
 
 				var tile = new Tile
 				{
@@ -85,7 +91,7 @@ public partial class Map
 					tile.Flags |= TileFlag.Solid;
 					tile.Collider = new PhysicsBody( Game.PhysicsWorld )
 					{
-						Position = tile.Position + Vector3.Up * 20,
+						Position = tile.Position,
 						BodyType = PhysicsBodyType.Static,
 						GravityEnabled = false,
 					};

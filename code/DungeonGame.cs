@@ -9,15 +9,6 @@ public partial class DungeonGame : GameManager
 	{
 		Map = new( 32, 32 );
 
-		if ( Game.IsServer )
-		{
-			var ent = new ModelEntity( "models/dev/plane.vmdl" );
-			ent.EnableDrawing = false;
-			ent.Position = Vector3.Down * Map.TileSize / 2;
-			float size = 10000;
-			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
-		}
-
 		if ( Game.IsClient )
 			_ = new Dungeon.UI.Hud();
 	}
