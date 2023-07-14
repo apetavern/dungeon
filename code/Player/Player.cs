@@ -51,7 +51,7 @@ public partial class Player : AnimatedEntity
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
 
-		if ( Game.IsServer && Input.Down( "attack1" ) )
+		if ( Game.IsServer && Input.Pressed( "attack1" ) )
 		{
 			var tr = Trace.Ray( AimRay, 200 ).Ignore( this ).WithTag( Tag.Tile ).Run();
 			if ( tr.Body is null || !tr.Shape.HasTag( Tag.Tile ) )
