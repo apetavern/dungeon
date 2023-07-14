@@ -3,6 +3,10 @@
 @inherits RootPanel
 @attribute [StyleSheet]
 
+
+@if (!DungeonConfig.DrawHud)
+    return;
+
 <root>
     <div>@Player.Local.FloorsCleared</div>
 </root>
@@ -10,6 +14,6 @@
 @code {
     protected override int BuildHash()
     {
-        return System.HashCode.Combine(Player.Local.FloorsCleared);
+        return System.HashCode.Combine(Player.Local.FloorsCleared, DungeonConfig.DrawHud);
     }
 }

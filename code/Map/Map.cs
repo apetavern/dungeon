@@ -4,12 +4,12 @@ public partial class Map
 {
 	public static Map? Current;
 
-	public static float CellHeight => CellSize;
-	public static float CellSize = 64f;
-	static Model WallModel = Model.Load( "models/wall.vmdl" );
-	static Model FloorModel = Model.Load( "models/floor.vmdl" );
+	public static float TileHeight => TileSize;
+	public static float TileSize = 64f;
 
-	public bool Initialized;
+	public static Model FloorModel = Model.Load( "models/floor.vmdl" );
+	public static Model WallModel = Model.Load( "models/wall.vmdl" );
+	public static Model UnbreakableWallModel = Model.Load( "models/wall_unbreakable.vmdl" );
 
 	public int Seed { get; private set; }
 	public int Width { get; set; }
@@ -23,6 +23,7 @@ public partial class Map
 	public int Level { get; private set; }
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
+	[ClientOnly] public bool Initialized;
 
 	public Map( int w, int d )
 	{
@@ -34,7 +35,7 @@ public partial class Map
 
 		if ( Game.IsServer )
 		{
-			SetupCells();
+			SetupTiles();
 			//Bounds = new BBox(Vector3.One * -w,)
 		}
 
@@ -49,11 +50,12 @@ public partial class Map
 		Level++;
 		DeleteMapShared();
 		DeleteMapClient( To.Everyone );
-		SetupCells();
+		SetupTiles();
 		TransmitMapData( To.Everyone );
+		RegenerateClient( To.Everyone );
 	}
 
-	private void SetupCells()
+	private void SetupTiles()
 	{
 		Game.SetRandomSeed( Seed + Level );
 
@@ -62,41 +64,53 @@ public partial class Map
 
 		AllTiles ??= new();
 		Lights ??= new();
+
 		for ( int x = 0; x < Width; ++x )
 		{
 			for ( int y = 0; y < Depth; ++y )
 			{
-				var isWall = Game.Random.Next( 3 ) == 1;
-				var cellPos = new Vector3( x * CellSize, y * CellSize, 0 );
-				var cell = new Tile
+				var isUnbreakable = (x <= Width && y == 0) || (x == 0 && y <= Depth) || (x <= Width && y == Depth - 1) || (x == Width - 1 && y <= Depth);
+				var isWall = Game.Random.Next( 3 ) == 1 || isUnbreakable;
+				var tilePos = new Vector3( x * TileSize, y * TileSize, 0 );
+
+				var tile = new Tile
 				{
-					Position = cellPos,
+					Position = tilePos,
 					TileType = isWall ? Tiles.Wall : Tiles.Floor,
+					Flags = TileFlag.None
 				};
 
 				if ( isWall )
 				{
-					cell.Collider = new PhysicsBody( Game.PhysicsWorld )
+					tile.Flags |= TileFlag.Solid;
+					tile.Collider = new PhysicsBody( Game.PhysicsWorld )
 					{
-						Position = cell.Position + Vector3.Up * CellSize / 2,
+						Position = tile.Position + Vector3.Up * 20,
 						BodyType = PhysicsBodyType.Static,
 						GravityEnabled = false,
 					};
 
-					var shape = cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+					var shape = tile.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * TileSize );
 					shape.AddTag( Tag.Tile );
 					shape.AddTag( Tag.World );
 				}
 				else if ( Game.Random.Next( Width ) < 3 )
 				{
-					Lights.Add( new LightActor( Game.SceneWorld, cellPos, 300, Color.FromRgb( 0xe25822 ) ) );
+					Lights.Add( new LightActor( Game.SceneWorld, tilePos, 300, Color.FromRgb( 0xe25822 ) ) );
 				}
 
-				AllTiles.Add( cell );
+				if ( isUnbreakable )
+				{
+					tile.TileType = Tiles.UnbreakableWall;
+					tile.Flags |= TileFlag.Unbreakable;
+				}
+
+				AllTiles.Add( tile );
 
 				if ( !foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
 				{
-					PlayerSpawn = new Transform( cellPos, Rotation.Identity );
+					PlayerSpawn = new Transform( tilePos, Rotation.Identity );
+					Log.Info( $"Found a spawn: {PlayerSpawn.Value.Position}" );
 					foundSpawn = true;
 				}
 
@@ -104,53 +118,62 @@ public partial class Map
 				{
 					var hatch = new Hatch();
 					hatch.SetModel( "models/hatch.vmdl" );
-					hatch.Position = cell.Position;
+					hatch.Position = tile.Position;
 					hatchSpawn = true;
 					MapEntities.Add( hatch );
 
 				}
 			}
 		}
+
+		if ( !foundSpawn )
+			Log.Error( "Couldn't find a spot for PlayerSpawn!" );
 	}
 
-	public Tile GetCellFromBody( PhysicsBody body )
+	public Tile GetTileFromBody( PhysicsBody body )
 	{
 		// :(
 		return AllTiles.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
 	[ServerOnly]
-	public void ChangeCell( Tile cell, Tiles newType )
+	public void ChangeTile( Tile tile, Tiles newType )
 	{
 		Game.AssertServer();
-		var index = Current.AllTiles.IndexOf( cell );
-		ChangeCell( index, newType );
+		var index = Current.AllTiles.IndexOf( tile );
+		ChangeTile( index, newType, TileFlag.None );
 	}
 
 	[ServerOnly]
-	public void ChangeCell( int index, Tiles newType )
+	public void ChangeTile( int index, Tiles nextTileType, TileFlag nextFlags )
 	{
 		Game.AssertServer();
-		ChangeCellShared( index, newType );
-		ChangeCellClient( To.Everyone, index, newType );
+		ChangeTileShared( index, nextTileType, nextFlags );
+		ChangeTileClient( To.Everyone, index, nextTileType );
 	}
 
 	[ClientRpc]
-	public static void ChangeCellClient( int index, Tiles newType )
+	public static void ChangeTileClient( int index, Tiles newType )
 	{
-		var cell = Current.AllTiles[index];
+		var tile = Current.AllTiles[index];
 
-		if ( cell.TileType is Tiles.Wall && newType is Tiles.Floor )
+		if ( tile.TileType is Tiles.Wall && newType is Tiles.Floor )
 		{
-			cell.Collider.Enabled = false;
-			cell.SceneObject.Model = FloorModel;
-			cell.TileType = Tiles.Floor;
+			tile.Collider.Enabled = false;
+			tile.SceneObject.Model = FloorModel;
+			tile.TileType = Tiles.Floor;
 		}
 	}
 
 	[GameEvent.Tick]
 	public void OnTick()
 	{
+		if ( DungeonConfig.TileDebug )
+		{
+			foreach ( var tile in AllTiles )
+				tile.DebugDraw();
+		}
+
 		if ( Game.IsClient )
 			return;
 	}
@@ -168,7 +191,11 @@ public partial class Map
 			Initialized = true;
 		}
 
-		// Don't update map culling if we aren't even moving.b
+		// TODO: Change to TimeSince lastmoved or something.
+		// Sometimes after regenerating level the culling doesn't
+		// get updated properly.
+
+		// Don't update map culling if we aren't even moving.
 		if ( Player.Local.MoveInput.Length == 0 )
 			return;
 
@@ -177,10 +204,13 @@ public partial class Map
 
 	private void CullPass()
 	{
-		foreach ( var cell in AllTiles )
+		if ( !DungeonConfig.EnabledCulling )
+			return;
+
+		foreach ( var tile in AllTiles )
 		{
-			if ( cell.SceneObject.IsValid() )
-				cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < DungeonConfig.MapViewDistance;
+			if ( tile.SceneObject.IsValid() )
+				tile.SceneObject.RenderingEnabled = Player.Local.Position.Distance( tile.Position ) < DungeonConfig.MapViewDistance;
 		}
 
 		foreach ( var light in Lights )

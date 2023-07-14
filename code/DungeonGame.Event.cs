@@ -7,6 +7,6 @@ partial class DungeonGame
 	{
 		Map.Regenerate();
 		foreach ( var client in Game.Clients )
-			client.Pawn.Position = Map.PlayerSpawn.Value.Position;
+			client.Pawn.Position = Map.PlayerSpawn.Value.Position.WithZ( client.Pawn.Position.z );
 	}
 }

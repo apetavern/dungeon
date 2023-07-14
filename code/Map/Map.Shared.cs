@@ -2,36 +2,17 @@
 
 partial class Map
 {
-	private void ChangeCellShared( int index, Tiles newType )
+	private void ChangeTileShared( int index, Tiles nextTileType, TileFlag nextFlags )
 	{
-		var cell = AllTiles[index];
-		Log.Info( $"Changing cell: {index} from {cell.TileType} to {newType}" );
+		var tile = AllTiles[index];
+		Log.Info( $"Changing tile: {index} from {tile.TileType} to {nextTileType}" );
 
-		if ( newType is Tiles.Floor && cell.TileType is Tiles.Wall )
-		{
-			cell.Collider.Enabled = false;
-		}
+		tile.Collider.Enabled = nextFlags.HasFlag( TileFlag.Solid );
 
 		if ( Game.IsClient )
-		{
-			switch ( newType )
-			{
-				case Tiles.None:
-					cell.SceneObject.Model = Model.Load( "error.vmdl" );
-					break;
-				case Tiles.Floor:
-					cell.SceneObject.Model = FloorModel;
-					break;
-				case Tiles.Wall:
-					cell.SceneObject.Model = WallModel;
-					break;
-				default:
-					cell.SceneObject.Model = FloorModel;
-					break;
-			}
-		}
+			tile.SceneObject.Model = tile.GetModelForTileType();
 
-		cell.TileType = newType;
+		tile.TileType = nextTileType;
 	}
 
 	private void DeleteMapShared()

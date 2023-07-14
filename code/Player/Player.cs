@@ -57,8 +57,9 @@ public partial class Player : AnimatedEntity
 			if ( tr.Body is null || !tr.Shape.HasTag( Tag.Tile ) )
 				return;
 
-			var cell = Map.Current.GetCellFromBody( tr.Body );
-			Map.Current.ChangeCell( cell, Tiles.Floor );
+			var tile = Map.Current.GetTileFromBody( tr.Body );
+			if ( !tile.Flags.HasFlag( TileFlag.Unbreakable ) )
+				Map.Current.ChangeTile( tile, Tiles.Floor );
 		}
 
 		ActiveWeapon?.Simulate( cl );

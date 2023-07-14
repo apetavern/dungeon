@@ -13,9 +13,7 @@ partial class Map
 				writer.Write( AllTiles.Count );
 				for ( int i = 0; i < AllTiles.Count; i++ )
 				{
-					var c = AllTiles[i];
-					writer.Write( c.Position );
-					writer.Write( (short)c.TileType );
+					AllTiles[i].Write( writer );
 				}
 
 				writer.Write( Lights.Count );
@@ -29,14 +27,23 @@ partial class Map
 					writer.Write( info.Color );
 				}
 
-				ReceiveMapData( to, stream.GetBuffer() );
+				var bytes = stream.GetBuffer();
+				if ( DungeonConfig.UseNetworkCompression )
+					bytes = Compression.Compress( bytes );
+
+				Log.Out( $"Sending {bytes.Length}", LogContext.Networking );
+				ReceiveMapData( to, bytes );
 			}
 		}
 	}
 
 	[ClientRpc]
-	public static void ReceiveMapData( byte[] data )
+	public static void ReceiveMapData( byte[] bytes )
 	{
+		Log.Out( $"Received: {bytes.Length} bytes.", LogContext.Networking );
+
+		var data = DungeonConfig.UseNetworkCompression ? Compression.Decompress( bytes ) : bytes;
+
 		if ( Current is null )
 			Current = new( 16, 16 );
 
@@ -45,32 +52,12 @@ partial class Map
 			using ( var reader = new BinaryReader( stream ) )
 			{
 				Current.AllTiles ??= new();
-				var cellCount = reader.ReadInt32();
-				for ( int i = 0; i < cellCount; i++ )
+				var tileCount = reader.ReadInt32();
+				for ( int i = 0; i < tileCount; i++ )
 				{
-					var position = reader.ReadVector3();
-					var cellType = (Tiles)reader.ReadInt16();
-					var isWall = cellType is Tiles.Wall;
-					var cell = new Tile
-					{
-						Position = position,
-						TileType = cellType,
-						SceneObject = new SceneObject( Game.SceneWorld, isWall ? WallModel : FloorModel, new Transform( position, Rotation.Identity ) )
-					};
-
-					if ( isWall )
-					{
-						cell.Collider = new PhysicsBody( Game.PhysicsWorld )
-						{
-							Position = cell.Position + Vector3.Up * CellSize / 2,
-							BodyType = PhysicsBodyType.Static,
-							GravityEnabled = false,
-						};
-
-						cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
-					}
-
-					Current.AllTiles.Add( cell );
+					var tile = Tile.Read( reader );
+					if ( tile is not null )
+						Current.AllTiles.Add( tile );
 				}
 
 				Current.Lights ??= new();
@@ -92,5 +79,11 @@ partial class Map
 	public static void DeleteMapClient()
 	{
 		Current?.DeleteMapShared();
+	}
+
+	[ClientRpc]
+	public static void RegenerateClient()
+	{
+		Current.CullPass();
 	}
 }

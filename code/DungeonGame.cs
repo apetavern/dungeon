@@ -13,7 +13,7 @@ public partial class DungeonGame : GameManager
 		{
 			var ent = new ModelEntity( "models/dev/plane.vmdl" );
 			ent.EnableDrawing = false;
-			ent.Position = Vector3.Down * Map.CellSize / 2;
+			ent.Position = Vector3.Down * Map.TileSize / 2;
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 		}
@@ -40,15 +40,12 @@ public partial class DungeonGame : GameManager
 		client.Pawn = pawn;
 
 		var spawnpoint = Map.PlayerSpawn ?? new Transform( Vector3.One.WithZ( 64 ), Rotation.Identity );
-		var tx = spawnpoint.WithPosition( spawnpoint.Position + Vector3.Up * 1.5f );
+		// 29 == 1 + getpos's Z pos;
+		var tx = spawnpoint.WithPosition( spawnpoint.Position.WithZ( 29 ) );
 		pawn.Transform = spawnpoint;
 
 		if ( Map is not null )
 			Map.TransmitMapData( To.Single( client ) );
-	}
-
-	public void FinishLevel()
-	{
 	}
 
 	[ConCmd.Admin( "noclip" )]
