@@ -81,7 +81,7 @@ public partial class Player : AnimatedEntity
 
 		Camera.Position = EyePosition;
 		Camera.Rotation = EyeRotation;
-		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 60 );
+		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 75 );
 		Camera.FirstPersonViewer = this;
 		Camera.ZNear = 0.5f;
 	}
