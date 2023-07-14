@@ -15,7 +15,7 @@ public class WalkMechanic : PlayerControllerMechanic
 
 	protected override bool ShouldStart()
 	{
-		return true;
+		return Controller.AllowMovement;
 	}
 
 	protected override void Simulate()

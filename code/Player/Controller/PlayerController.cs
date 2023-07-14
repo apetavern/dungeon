@@ -4,6 +4,8 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 {
 	public Player Player => Entity;
 
+	[Net] public bool AllowMovement { get; set; }
+
 	public Vector3 Position
 	{
 		get => Player.Position;
@@ -156,8 +158,8 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 
 		var tr = Trace.Ray( start, end )
 					.Size( mins, maxs )
-					.WithAnyTags( "solid", "playerclip", "passbullets", "player" )
-					.WithoutTags("hitbox")
+					.WithAnyTags( Tag.Solid, "playerclip", "passbullets", "player" )
+					.WithoutTags( Tag.Hitbox )
 					.Ignore( Player )
 					.Run();
 
@@ -269,6 +271,6 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 		Velocity = mover.Velocity;
 	}
 
-	[ConVar.Replicated( "debug_player_controller" )]
+	[ConVar.Replicated( "dng_debug_player_controller" )]
 	public static bool Debug { get; set; } = false;
 }

@@ -23,6 +23,12 @@ public partial class DungeonGame : GameManager
 		base.OnVoicePlayed( cl );
 	}
 
+	public override void Simulate( IClient cl )
+	{
+		base.Simulate( cl );
+		DebugOverlay.Axis( Position, Rotation.Identity, Map.TileSize, 0, false );
+	}
+
 	public override void ClientJoined( IClient client )
 	{
 		base.ClientJoined( client );
