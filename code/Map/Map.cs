@@ -42,97 +42,10 @@ public partial class Map
 			//ent.Position = Vector3.Down * Map.TileSize / 2;
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
-			SetupTiles();
+			Generate();
 		}
 
 		Event.Register( this );
-	}
-
-	public void Regenerate()
-	{
-		if ( Game.IsClient )
-			return;
-
-		Level++;
-		DeleteMapShared();
-		DeleteMapClient( To.Everyone );
-		SetupTiles();
-		TransmitMapData( To.Everyone );
-		RegenerateClient( To.Everyone );
-	}
-
-	private void SetupTiles()
-	{
-		Game.SetRandomSeed( Seed + Level );
-
-		var foundSpawn = false;
-		var hatchSpawn = false;
-
-		AllTiles ??= new();
-		Lights ??= new();
-
-		for ( int x = 0; x < Width; ++x )
-		{
-			for ( int y = 0; y < Depth; ++y )
-			{
-				var isUnbreakable = (x <= Width && y == 0) || (x == 0 && y <= Depth) || (x <= Width && y == Depth - 1) || (x == Width - 1 && y <= Depth);
-				var isWall = Game.Random.Next( 3 ) == 1 || isUnbreakable;
-				var tilePos = new Vector3( x * TileSize, y * TileSize, TileSize / 2 );
-
-				var tile = new Tile
-				{
-					Position = tilePos,
-					TileType = isWall ? Tiles.Wall : Tiles.Floor,
-					Flags = TileFlag.None
-				};
-
-				if ( isWall )
-				{
-					tile.Flags |= TileFlag.Solid;
-					tile.Collider = new PhysicsBody( Game.PhysicsWorld )
-					{
-						Position = tile.Position,
-						BodyType = PhysicsBodyType.Static,
-						GravityEnabled = false,
-					};
-
-					var shape = tile.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * TileSize );
-					shape.AddTag( Tag.Tile );
-					shape.AddTag( Tag.World );
-				}
-				else if ( Game.Random.Next( Width ) < 3 )
-				{
-					Lights.Add( new LightActor( Game.SceneWorld, tilePos, 300, Color.FromRgb( 0xe25822 ) ) );
-				}
-
-				if ( isUnbreakable )
-				{
-					tile.TileType = Tiles.UnbreakableWall;
-					tile.Flags |= TileFlag.Unbreakable;
-				}
-
-				AllTiles.Add( tile );
-
-				if ( !foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
-				{
-					PlayerSpawn = new Transform( tilePos, Rotation.Identity );
-					Log.Info( $"Found a spawn: {PlayerSpawn.Value.Position}" );
-					foundSpawn = true;
-				}
-
-				if ( !hatchSpawn && Game.Random.Next( Width ) <= 2 && !isWall )
-				{
-					var hatch = new Hatch();
-					hatch.SetModel( "models/hatch.vmdl" );
-					hatch.Position = tile.Position.WithZ( 6 );
-					hatchSpawn = true;
-					MapEntities.Add( hatch );
-				}
-			}
-		}
-
-		if ( !foundSpawn )
-			Log.Error( "Couldn't find a spot for PlayerSpawn!" );
 	}
 
 	public Tile GetTileFromBody( PhysicsBody body )
