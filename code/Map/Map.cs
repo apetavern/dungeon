@@ -124,10 +124,9 @@ public partial class Map
 				{
 					var hatch = new Hatch();
 					hatch.SetModel( "models/hatch.vmdl" );
-					hatch.Position = tile.Position;
+					hatch.Position = tile.Position.WithZ( 6 );
 					hatchSpawn = true;
 					MapEntities.Add( hatch );
-
 				}
 			}
 		}

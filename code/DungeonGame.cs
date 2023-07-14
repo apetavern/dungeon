@@ -31,8 +31,7 @@ public partial class DungeonGame : GameManager
 		client.Pawn = pawn;
 
 		var spawnpoint = Map.PlayerSpawn ?? new Transform( Vector3.One.WithZ( 64 ), Rotation.Identity );
-		// 29 == 1 + getpos's Z pos;
-		var tx = spawnpoint.WithPosition( spawnpoint.Position.WithZ( 29 ) );
+		var tx = spawnpoint;
 		pawn.Transform = spawnpoint;
 
 		if ( Map is not null )
