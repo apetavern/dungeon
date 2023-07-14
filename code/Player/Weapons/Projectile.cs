@@ -35,7 +35,7 @@ public partial class Projectile : Entity
 	{
 		var tr = Trace
 			.Sphere( Radius, Position, Position + Velocity )
-			.WithTag( Tag.World )
+			.WithAnyTags( Tag.World, Tag.Hitbox)
 			.Run();
 
 		//DebugOverlay.Sphere( Position, Radius, Color.Green, 2, true );

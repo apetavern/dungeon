@@ -9,7 +9,8 @@ public partial class Enemy : ModelEntity
 	public override void Spawn()
 	{
 		base.Spawn();
-		Tags.Add( "hibox" );
+		Tags.Add( Tag.Hitbox );
+		Tags.Add( Tag.Enemy );
 		this.SetupCollision( boundsSize: BoundsSize );
 		Health = StartingHealth;
 	}
