@@ -10,11 +10,14 @@ public partial class Player : AnimatedEntity
 
 	[Net] public Weapon? ActiveWeapon { get; private set; }
 
+	[Net] public int FloorsCleared { get; private set; }
+
 	private PointLightEntity? RPGLight { get; set; }
 
 	public override void Spawn()
 	{
 		base.Spawn();
+		Tags.Add( Tag.Player, Tag.Entity );
 
 		EnableDrawing = true;
 		EnableHideInFirstPerson = true;
@@ -26,12 +29,13 @@ public partial class Player : AnimatedEntity
 		Components.Create<WalkMechanic>();
 		Components.Create<AirMoveMechanic>();
 
-		//RPGLight = new PointLightEntity();
+		//RPGLight = new PointLightEntity()
 		//RPGLight.Color = Color.FromRgb( 0xEBDEAB );
 
 		PrefabLibrary.TrySpawn<Weapon>( "prefabs/weapons/firestaff/firestaff.prefab", out var weapon );
 		weapon.Owner = this;
 		ActiveWeapon = weapon;
+		this.SetupCollision( PhysicsMotionType.Keyframed );
 	}
 
 	public override void ClientSpawn()
@@ -49,8 +53,8 @@ public partial class Player : AnimatedEntity
 
 		if ( Game.IsServer && Input.Down( "attack1" ) )
 		{
-			var tr = Trace.Ray( AimRay, 200 ).Run();
-			if ( tr.Body is null )
+			var tr = Trace.Ray( AimRay, 200 ).Ignore( this ).WithTag( Tag.Tile ).Run();
+			if ( tr.Body is null || !tr.Shape.HasTag( Tag.Tile ) )
 				return;
 
 			var cell = Map.Current.GetCellFromBody( tr.Body );

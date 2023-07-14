@@ -1,6 +1,6 @@
 ﻿namespace Dungeon;
 
-public class LightActor
+public class LightActor : IDelete
 {
 	/// <summary>
 	/// If the client is culling this light because its 
@@ -9,6 +9,7 @@ public class LightActor
 	public bool Culled { get; private set; }
 	public bool Lit;
 	public LightInfo Info;
+
 	public SceneLight Light;
 
 	public LightActor( SceneWorld world, Vector3 position, float radius, Color color )
@@ -43,6 +44,11 @@ public class LightActor
 
 		Culled = false;
 		Light = new( Info.SceneWorld, Info.Position, Info.Radius, Info.Color );
+	}
+
+	public void Delete()
+	{
+		Light?.Delete();
 	}
 }
 

@@ -14,12 +14,15 @@ public partial class Map
 	public int Seed { get; private set; }
 	public int Width { get; set; }
 	public int Depth { get; set; }
+	public BBox Bounds { get; private set; }
 
-	public List<Tile> AllCells;
+	public List<Tile> AllTiles;
 	public List<LightActor> Lights;
+	public List<Entity> MapEntities = new();
+
+	public int Level { get; private set; }
 
 	[ServerOnly] public Transform? PlayerSpawn { get; private set; }
-	[ServerOnly] private bool _foundSpawn = false;
 
 	public Map( int w, int d )
 	{
@@ -27,20 +30,37 @@ public partial class Map
 		Width = w;
 		Depth = d;
 
-		Seed = Game.Random.Next();
+		Seed = DungeonConfig.Seed;
+
 		if ( Game.IsServer )
 		{
 			SetupCells();
+			//Bounds = new BBox(Vector3.One * -w,)
 		}
 
 		Event.Register( this );
 	}
 
+	public void Regenerate()
+	{
+		if ( Game.IsClient )
+			return;
+
+		Level++;
+		DeleteMapShared();
+		DeleteMapClient( To.Everyone );
+		SetupCells();
+		TransmitMapData( To.Everyone );
+	}
+
 	private void SetupCells()
 	{
-		Game.SetRandomSeed( Seed );
+		Game.SetRandomSeed( Seed + Level );
 
-		AllCells ??= new();
+		var foundSpawn = false;
+		var hatchSpawn = false;
+
+		AllTiles ??= new();
 		Lights ??= new();
 		for ( int x = 0; x < Width; ++x )
 		{
@@ -63,36 +83,47 @@ public partial class Map
 						GravityEnabled = false,
 					};
 
-					cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+					var shape = cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
+					shape.AddTag( Tag.Tile );
+					shape.AddTag( Tag.World );
 				}
 				else if ( Game.Random.Next( Width ) < 3 )
 				{
 					Lights.Add( new LightActor( Game.SceneWorld, cellPos, 300, Color.FromRgb( 0xe25822 ) ) );
 				}
 
-				AllCells.Add( cell );
+				AllTiles.Add( cell );
 
-				if ( !_foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
+				if ( !foundSpawn && Game.Random.Next( Width ) == 2 && !isWall )
 				{
 					PlayerSpawn = new Transform( cellPos, Rotation.Identity );
-					_foundSpawn = true;
+					foundSpawn = true;
+				}
+
+				if ( !hatchSpawn && Game.Random.Next( Width ) <= 2 && !isWall )
+				{
+					var hatch = new Hatch();
+					hatch.SetModel( "models/hatch.vmdl" );
+					hatch.Position = cell.Position;
+					hatchSpawn = true;
+					MapEntities.Add( hatch );
+
 				}
 			}
 		}
 	}
 
-
 	public Tile GetCellFromBody( PhysicsBody body )
 	{
 		// :(
-		return AllCells.Where( x => x.Collider == body ).FirstOrDefault();
+		return AllTiles.Where( x => x.Collider == body ).FirstOrDefault();
 	}
 
 	[ServerOnly]
 	public void ChangeCell( Tile cell, Tiles newType )
 	{
 		Game.AssertServer();
-		var index = Current.AllCells.IndexOf( cell );
+		var index = Current.AllTiles.IndexOf( cell );
 		ChangeCell( index, newType );
 	}
 
@@ -107,7 +138,7 @@ public partial class Map
 	[ClientRpc]
 	public static void ChangeCellClient( int index, Tiles newType )
 	{
-		var cell = Current.AllCells[index];
+		var cell = Current.AllTiles[index];
 
 		if ( cell.TileType is Tiles.Wall && newType is Tiles.Floor )
 		{
@@ -117,37 +148,7 @@ public partial class Map
 		}
 	}
 
-	private void ChangeCellShared( int index, Tiles newType )
-	{
-		var cell = AllCells[index];
-		Log.Info( $"Changing cell: {index} from {cell.TileType} to {newType}" );
 
-		if ( newType is Tiles.Floor && cell.TileType is Tiles.Wall )
-		{
-			cell.Collider.Enabled = false;
-		}
-
-		if ( Game.IsClient )
-		{
-			switch ( newType )
-			{
-				case Tiles.None:
-					cell.SceneObject.Model = Model.Load( "error.vmdl" );
-					break;
-				case Tiles.Floor:
-					cell.SceneObject.Model = FloorModel;
-					break;
-				case Tiles.Wall:
-					cell.SceneObject.Model = WallModel;
-					break;
-				default:
-					cell.SceneObject.Model = FloorModel;
-					break;
-			}
-		}
-
-		cell.TileType = newType;
-	}
 
 	[GameEvent.Tick]
 	public void OnTick()
@@ -159,11 +160,11 @@ public partial class Map
 	[GameEvent.Client.Frame]
 	public void OnFrame()
 	{
-		if ( AllCells is null || Lights is null )
+		if ( AllTiles is null || Lights is null )
 			return;
-			
+
 		// Do this because when we first spawn we wan't to cull the map at least once.
-		if(!Initialized)
+		if ( !Initialized )
 		{
 			CullPass();
 			Initialized = true;
@@ -178,7 +179,7 @@ public partial class Map
 
 	private void CullPass()
 	{
-		foreach ( var cell in AllCells )
+		foreach ( var cell in AllTiles )
 		{
 			cell.SceneObject.RenderingEnabled = Player.Local.Position.Distance( cell.Position ) < DungeonConfig.MapViewDistance;
 		}

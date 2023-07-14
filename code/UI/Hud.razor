@@ -1,0 +1,15 @@
+@namespace Dungeon.UI
+@using Sandbox.UI;
+@inherits RootPanel
+@attribute [StyleSheet]
+
+<root>
+    <div>@Player.Local.FloorsCleared</div>
+</root>
+
+@code {
+    protected override int BuildHash()
+    {
+        return System.HashCode.Combine(Player.Local.FloorsCleared);
+    }
+}

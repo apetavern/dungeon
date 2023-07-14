@@ -10,7 +10,7 @@ public partial class Enemy : ModelEntity
 	{
 		base.Spawn();
 		Tags.Add( "hibox" );
-		SetupPhysicsFromAABB( PhysicsMotionType.Keyframed, new Vector3(-BoundsSize, -BoundsSize, 0), new Vector3( BoundsSize, BoundsSize, Map.CellHeight) );
+		this.SetupCollision( boundsSize: BoundsSize );
 		Health = StartingHealth;
 	}
 

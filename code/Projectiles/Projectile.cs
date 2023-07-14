@@ -33,7 +33,11 @@ public partial class Projectile : Entity
 	[GameEvent.Tick.Server]
 	void Tick()
 	{
-		var tr = Trace.Sphere( Radius, Position, Position + Velocity ).WithoutTags( "player" ).Run();
+		var tr = Trace
+			.Sphere( Radius, Position, Position + Velocity )
+			.WithTag( Tag.World )
+			.Run();
+
 		//DebugOverlay.Sphere( Position, Radius, Color.Green, 2, true );
 		Position += Velocity;
 

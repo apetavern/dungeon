@@ -10,10 +10,10 @@ partial class Map
 		{
 			using ( var writer = new BinaryWriter( stream ) )
 			{
-				writer.Write( AllCells.Count );
-				for ( int i = 0; i < AllCells.Count; i++ )
+				writer.Write( AllTiles.Count );
+				for ( int i = 0; i < AllTiles.Count; i++ )
 				{
-					var c = AllCells[i];
+					var c = AllTiles[i];
 					writer.Write( c.Position );
 					writer.Write( (short)c.TileType );
 				}
@@ -44,7 +44,7 @@ partial class Map
 		{
 			using ( var reader = new BinaryReader( stream ) )
 			{
-				Current.AllCells ??= new();
+				Current.AllTiles ??= new();
 				var cellCount = reader.ReadInt32();
 				for ( int i = 0; i < cellCount; i++ )
 				{
@@ -70,7 +70,7 @@ partial class Map
 						cell.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * CellSize );
 					}
 
-					Current.AllCells.Add( cell );
+					Current.AllTiles.Add( cell );
 				}
 
 				Current.Lights ??= new();
@@ -86,5 +86,11 @@ partial class Map
 				}
 			}
 		}
+	}
+
+	[ClientRpc]
+	public static void DeleteMapClient()
+	{
+		Current?.DeleteMapShared();
 	}
 }

@@ -3,10 +3,11 @@
 public partial class DungeonGame : GameManager
 {
 	public static DungeonGame Instance => (Current as DungeonGame);
+	public Map Map { get; private set; }
 
 	public DungeonGame()
 	{
-		SetupMap();
+		Map = new( 32, 32 );
 
 		if ( Game.IsServer )
 		{
@@ -16,6 +17,9 @@ public partial class DungeonGame : GameManager
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 		}
+
+		if ( Game.IsClient )
+			_ = new Dungeon.UI.Hud();
 	}
 
 	public override void ClientSpawn()
@@ -41,6 +45,10 @@ public partial class DungeonGame : GameManager
 
 		if ( Map is not null )
 			Map.TransmitMapData( To.Single( client ) );
+	}
+
+	public void FinishLevel()
+	{
 	}
 
 	[ConCmd.Admin( "noclip" )]

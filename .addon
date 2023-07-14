@@ -35,7 +35,10 @@
         "trigger": "Trigger",
         "ladder": "Ignore",
         "water": "Trigger",
-        "hitbox": "Unset"
+        "hitbox": "Unset",
+        "nonsolid": "Unset",
+        "player": "Unset",
+        "world": "Unset"
       },
       "Pairs": [
         {
@@ -61,6 +64,29 @@
         {
           "a": "playerclip",
           "b": "solid",
+          "r": "Collide"
+        },
+        {
+          "a": "solid",
+          "b": "player"
+        },
+        {
+          "a": "nonsolid",
+          "b": "player",
+          "r": "Ignore"
+        },
+        {
+          "a": "hitbox",
+          "b": "nonsolid",
+          "r": "Ignore"
+        },
+        {
+          "a": "world",
+          "b": "world"
+        },
+        {
+          "a": "solid",
+          "b": "world",
           "r": "Collide"
         }
       ]
