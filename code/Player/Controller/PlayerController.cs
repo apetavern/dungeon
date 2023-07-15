@@ -4,7 +4,7 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 {
 	public Player Player => Entity;
 
-	[Net] public bool AllowMovement { get; set; }
+	[Net] public bool AllowMovement { get; set; } = true;
 
 	public Vector3 Position
 	{
@@ -111,6 +111,7 @@ public partial class PlayerController : EntityComponent<Player>, ISingletonCompo
 			DebugOverlay.ScreenText( $"    BaseVelocity: {BaseVelocity}", ++lineOffset );
 			DebugOverlay.ScreenText( $"    GroundEntity: {GroundEntity} [{GroundEntity?.Velocity}]", ++lineOffset );
 			DebugOverlay.ScreenText( $"           Speed: {Velocity.Length}", ++lineOffset );
+			DebugOverlay.ScreenText( $"AllowMove: {AllowMovement}", ++lineOffset );
 
 			++lineOffset;
 			DebugOverlay.ScreenText( $"Mechanics", ++lineOffset );

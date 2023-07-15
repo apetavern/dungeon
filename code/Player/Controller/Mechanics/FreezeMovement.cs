@@ -31,6 +31,7 @@ public class FreezeMovement : PlayerControllerMechanic
 
 		if ( _sinceAdded >= _duration )
 		{
+			Velocity = Vector3.Zero;
 			Controller.AllowMovement = true;
 			Remove();
 		}
