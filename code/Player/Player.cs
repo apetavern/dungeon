@@ -12,6 +12,8 @@ public partial class Player : AnimatedEntity
 
 	[Net] public int FloorsCleared { get; private set; }
 
+	[Net] public TimeSince SinceMoved { get; private set; }
+
 	private PointLightEntity? RPGLight { get; set; }
 
 	public override void Spawn()
@@ -50,6 +52,9 @@ public partial class Player : AnimatedEntity
 	{
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
+
+		if ( Controller.Velocity.WithZ( 0 ).Length > 0 )
+			SinceMoved = 0;
 
 		if ( Game.IsServer && Input.Pressed( "attack1" ) )
 		{

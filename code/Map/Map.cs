@@ -109,12 +109,7 @@ public partial class Map
 			Initialized = true;
 		}
 
-		// TODO: Change to TimeSince lastmoved or something.
-		// Sometimes after regenerating level the culling doesn't
-		// get updated properly.
-
-		// Don't update map culling if we aren't even moving.
-		if ( Player.Local.MoveInput.Length == 0 )
+		if ( Player.Local.SinceMoved >= 0.20f )
 			return;
 
 		CullPass();
