@@ -99,7 +99,7 @@
         "MaxPlayers": 2,
         "GameSettings": {},
         "Addons": "",
-        "PreLaunchCommand": "sv_lan 1;",
+        "PreLaunchCommand": "sv_lan 1; sv_password 234723;",
         "PostLaunchCommand": ""
       }
     ]
