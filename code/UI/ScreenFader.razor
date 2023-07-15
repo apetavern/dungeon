@@ -1,0 +1,46 @@
+﻿@using System;
+@using Sandbox.UI;
+
+@namespace Dungeon.UI
+@inherits Panel
+
+@code {
+    TimeUntil Done;
+    float duration;
+    float fadeRate;
+    float opacity = 1.0f;
+
+    public ScreenFader(float fadeDuration)
+    {
+        duration = fadeDuration;
+        Done = fadeDuration;
+
+        fadeRate = (1 - 0) / (fadeDuration * Game.TickRate);
+        fadeRate /= 2;
+        Style.Opacity = opacity;
+    }
+
+    public override void Tick()
+    {
+        opacity -= fadeRate;
+        Style.Opacity = opacity;
+        if (Done)
+            Delete();
+    }
+
+    protected override int BuildHash()
+    {
+        return HashCode.Combine(Time.Now);
+    }
+}
+
+<style>
+    ScreenFader {
+        position: absolute;
+        background-color: black;
+        width: 100%;
+        height: 100%;
+        /* opacity: 1; */
+    }
+</style>
+

@@ -1,5 +1,6 @@
-@namespace Dungeon.UI
 @using Sandbox.UI;
+
+@namespace Dungeon.UI
 @inherits RootPanel
 @attribute [StyleSheet]
 
@@ -12,6 +13,25 @@
 </root>
 
 @code {
+    public static Hud Instance { get; private set; }
+
+    public Hud()
+    {
+        if(Instance is not null)
+        {
+            Delete();
+            return;
+        }
+
+        Instance = this;
+    }
+
+    public void Fade(float duration)
+    {
+        AddChild(new ScreenFader(duration));
+    }
+
+
     protected override int BuildHash()
     {
         return System.HashCode.Combine(Player.Local.FloorsCleared, DungeonConfig.DrawHud);

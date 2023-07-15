@@ -22,7 +22,8 @@ public partial class Hatch : ModelEntity
 		var tr = Trace.Box( Bounds, Position, Position ).WithTag( Tag.Player ).Run();
 		if ( tr.Hit && tr.Entity is Player ply )
 		{
-			Event.Run( MapEvents.FloorCleared );
+			EventTransmitter.RunGlobalEvent( To.Everyone, MapEvents.FloorCleared );
+			//Event.Run( MapEvents.FloorCleared );
 			Log.Info( "Floor cleared." );
 			Triggered = true;
 			
