@@ -18,7 +18,7 @@ partial class Map
 	[GameEvent.Tick.Server]
 	void OnServerTick()
 	{
-		if ( Time.Tick % 16 == 0 )
+		if ( Time.Tick % 16 != 0 )
 			return;
 
 		if ( ShouldRebuildNav )
@@ -30,6 +30,6 @@ partial class Map
 
 	private async void BuildNav()
 	{
-		NavGrid = await Grid.Create( Vector3.Zero, Bounds, Rotation.Identity, cellSize: TileSize / 2.5f, save: false );
+		NavGrid = await Grid.Create( Vector3.Zero, Bounds, Rotation.Identity, cellSize: TileSize / 2.2f, save: false );
 	}
 }

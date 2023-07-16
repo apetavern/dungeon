@@ -6,10 +6,107 @@
     "Guid": "5f2beec0-5d7b-4fb3-8d82-a0d6e1ce6781",
     "Class": "Enemy",
     "Entities": [],
-    "Components": [],
+    "Components": [
+      {
+        "Guid": "28d1a8d5-5ff9-432f-ad35-ab63933b79ea",
+        "Class": "AIController",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022AIController\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "4eab67ab-8ee3-467b-bc26-58672e6adf0f",
+        "Class": "DetectPlayerInRadius",
+        "Keys": {
+          "Radius": {
+            "Type": "Single",
+            "Value": "300"
+          },
+          "_name": {
+            "Value": "\u0022DetectPlayerInRadius\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "7b667ad7-b261-4017-9721-82f578cd771f",
+        "Class": "Wander",
+        "Keys": {
+          "WanderRange": {
+            "Type": "Single",
+            "Value": "100"
+          },
+          "_name": {
+            "Value": "\u0022Wander\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "999f66d8-f0e0-4439-8152-83776d7380bd",
+        "Class": "Pather",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022Pather\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "d2808788-b11f-45b7-812c-8d311ff27f5b",
+        "Class": "FollowTarget",
+        "Keys": {
+          "LoseInterestRange": {
+            "Type": "Single",
+            "Value": "400"
+          },
+          "_name": {
+            "Value": "\u0022FollowTarget\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "74bb1026-43e8-4fa8-b0a8-08edea7eb2db",
+        "Class": "FaceTowardsTarget",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022FaceTowardsTarget\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "3877c034-228b-4601-908e-5a681b431406",
+        "Class": "TargetData",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022TargetData\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      }
+    ],
     "Keys": {
       "_name": {
-        "Value": "\u0022Root Entity\u0022"
+        "Value": "\u0022TestEnemy\u0022"
       },
       "_localposition": {
         "Value": "\u00220,0,0\u0022"
@@ -21,7 +118,7 @@
         "Value": "1"
       },
       "_tags": {
-        "Value": "\u0022\u0022"
+        "Value": "\u0022hitbox enemy\u0022"
       },
       "EHealth": {
         "Type": "Single",
