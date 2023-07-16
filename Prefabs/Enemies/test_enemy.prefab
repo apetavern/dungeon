@@ -48,6 +48,10 @@
           },
           "_tags": {
             "Value": "[]"
+          },
+          "WanderRate": {
+            "Type": "Int32",
+            "Value": "3"
           }
         }
       },
@@ -98,7 +102,9 @@
           "_name": {
             "Value": "\u0022TargetData\u0022"
           },
-          "_tags": {}
+          "_tags": {
+            "Value": "[]"
+          }
         }
       }
     ],

@@ -3,6 +3,8 @@
 [Prefab]
 public partial class Wander : AIBehaviour
 {
+	[Prefab] public int WanderRate { get; set; } = 200;
+	[Prefab] public int WanderChance { get; set; } = 35;
 	[Prefab] public float WanderRange { get; set; } = 32;
 
 	protected override void OnActivate()
@@ -14,7 +16,11 @@ public partial class Wander : AIBehaviour
 	{
 		base.Tick();
 
-		if ( Game.Random.Next( 0, 35 ) == 15 && Controller.TryGetBehaviour<Pather>( out var pather ) && pather.CurrentPath.Count <= 0 )
+		if ( Time.Tick % WanderRate != 0 )
+			return;
+
+
+		if ( Game.Random.Next( 0, WanderChance ) == 1 && Controller.TryGetBehaviour<Pather>( out var pather ) && pather.CurrentPath.Count <= 0 )
 		{
 			var randomNearPosition = Entity.Position + (Vector3.Random * WanderRange).WithZ( 0 );
 			var randomNearbyCell = Map.Instance.NavGrid.GetNearestCell( randomNearPosition );
@@ -30,7 +36,7 @@ public partial class Wander : AIBehaviour
 			Enabled = false;
 		}
 
-		if ( !Enabled &&  ev is LostInterestInTarget )
+		if ( !Enabled && ev is LostInterestInTarget )
 		{
 			Enabled = true;
 		}
