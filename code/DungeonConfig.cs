@@ -29,6 +29,6 @@ public static partial class DungeonConfig
 	[ConVar.Server( "dng_nav_rebuild_rate" )]
 	public static int NavRebuildRate { get; set; } = 16;
 
-	[ConVar.Server("dng_nav_path_compute_rate")]
-	public static int NavPathComputeRate { get; set; }
+	[ConVar.Server( "dng_nav_path_compute_rate" )]
+	public static int NavPathComputeRate { get; set; } = 16;
 }
