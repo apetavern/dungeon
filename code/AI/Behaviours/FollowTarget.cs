@@ -12,23 +12,23 @@ public partial class FollowTarget : AIBehaviour
 	{
 		base.Tick();
 
-		if ( !Controller.TryGetData<TargetData>( out var targetter ) )
+		if ( !Controller.TryGetData<TargetData>( out var targetData ) )
 			return;
 
-		var target = targetter.Target;
+		var target = targetData.Target;
 
 		if ( target is null || !Controller.TryGetBehaviour<Pather>( out var pather ) )
 			return;
 
 		if ( GivePersonalSpace )
-			pather.Target = target.Position.Distance( Entity.Position ) >= Map.TileSize / 2 ? target.Position : null;
+			pather.Target = targetData.Distance >= Map.TileSize / 2 ? target.Position : null;
 		else
 			pather.Target = target.Position;
 
 		if ( target.Position.Distance( Entity.Position ) >= LoseInterestRange && target is not null )
 		{
 			Controller.RunEvent( new LostInterestInTarget( this ) );
-			targetter.Target = null;
+			targetData.Target = null;
 		}
 	}
 

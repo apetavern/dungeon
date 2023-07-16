@@ -92,15 +92,13 @@
         }
       },
       {
-        "Guid": "3877c034-228b-4601-908e-5a681b431406",
+        "Guid": "9899f4e7-f53a-46e0-a989-c834cb7d7a0d",
         "Class": "TargetData",
         "Keys": {
           "_name": {
             "Value": "\u0022TargetData\u0022"
           },
-          "_tags": {
-            "Value": "[]"
-          }
+          "_tags": {}
         }
       }
     ],

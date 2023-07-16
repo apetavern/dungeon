@@ -1,6 +1,4 @@
-﻿using GridAStar;
-
-namespace Dungeon;
+﻿namespace Dungeon;
 
 [Prefab]
 public partial class AIController : EntityComponent, ISingletonComponent
@@ -77,5 +75,7 @@ public partial class AIController : EntityComponent, ISingletonComponent
 			comp.Tick();
 		}
 
+		if ( TryGetData<TargetData>( out var targetData ) )
+			targetData.Distance = Entity.Position.Distance( targetData.Target.Position );
 	}
 }
