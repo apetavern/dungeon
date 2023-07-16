@@ -2,10 +2,11 @@
 
 public partial class Map
 {
-	public static Map? Current;
+	public static Map? Instance;
 
-	public static float TileHeight => TileSize;
 	public static float TileSize = 64f;
+	public static float TileHeight => TileSize;
+	public static float HalfTile => TileSize / 2;
 
 	public static Model FloorModel = Model.Load( "models/floor.vmdl" );
 	public static Model WallModel = Model.Load( "models/wall.vmdl" );
@@ -29,11 +30,12 @@ public partial class Map
 
 	public Map( int w, int d )
 	{
-		Current = this;
+		Instance = this;
 		Width = w;
 		Depth = d;
 
 		Seed = DungeonConfig.Seed;
+		Bounds = new BBox( new Vector3( TileSize / 2, TileSize / 2, 0 ), new Vector3( (Width - 1) * TileSize - HalfTile, (Width - 1) * TileSize - HalfTile, TileSize ) );
 
 		if ( Game.IsServer )
 		{
@@ -43,6 +45,8 @@ public partial class Map
 			float size = 10000;
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 			Generate();
+
+			SetupNav();
 		}
 
 		Event.Register( this );
@@ -58,7 +62,7 @@ public partial class Map
 	public void ChangeTile( Tile tile, Tiles newType )
 	{
 		Game.AssertServer();
-		var index = Current.AllTiles.IndexOf( tile );
+		var index = Instance.AllTiles.IndexOf( tile );
 		ChangeTile( index, newType, TileFlag.None );
 	}
 
@@ -73,7 +77,7 @@ public partial class Map
 	[ClientRpc]
 	public static void ChangeTileClient( int index, Tiles newType )
 	{
-		var tile = Current.AllTiles[index];
+		var tile = Instance.AllTiles[index];
 
 		if ( tile.TileType is Tiles.Wall && newType is Tiles.Floor )
 		{
@@ -94,6 +98,8 @@ public partial class Map
 
 		if ( Game.IsClient )
 			return;
+
+		DebugOverlay.Box(Bounds, Color.Yellow );
 	}
 
 	[GameEvent.Client.Frame]

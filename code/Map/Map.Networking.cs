@@ -44,23 +44,23 @@ partial class Map
 
 		var data = DungeonConfig.UseNetworkCompression ? Compression.Decompress( bytes ) : bytes;
 
-		if ( Current is null )
-			Current = new( 16, 16 );
+		if ( Instance is null )
+			Instance = new( 16, 16 );
 
 		using ( var stream = new MemoryStream( data ) )
 		{
 			using ( var reader = new BinaryReader( stream ) )
 			{
-				Current.AllTiles ??= new();
+				Instance.AllTiles ??= new();
 				var tileCount = reader.ReadInt32();
 				for ( int i = 0; i < tileCount; i++ )
 				{
 					var tile = Tile.Read( reader );
 					if ( tile is not null )
-						Current.AllTiles.Add( tile );
+						Instance.AllTiles.Add( tile );
 				}
 
-				Current.Lights ??= new();
+				Instance.Lights ??= new();
 				var lightCount = reader.ReadInt32();
 				for ( int l = 0; l < lightCount; l++ )
 				{
@@ -69,7 +69,7 @@ partial class Map
 					var color = reader.ReadColor();
 					var light = new LightActor( Game.SceneWorld, position, radius, color );
 
-					Current.Lights.Add( light );
+					Instance.Lights.Add( light );
 				}
 			}
 		}
@@ -78,12 +78,12 @@ partial class Map
 	[ClientRpc]
 	public static void DeleteMapClient()
 	{
-		Current?.DeleteMapShared();
+		Instance?.DeleteMapShared();
 	}
 
 	[ClientRpc]
 	public static void RegenerateClient()
 	{
-		Current.CullPass();
+		Instance.CullPass();
 	}
 }

@@ -62,11 +62,14 @@ public partial class Player : AnimatedEntity
 			if ( tr.Body is null || !tr.Shape.HasTag( Tag.Tile ) )
 				return;
 
-			var tile = Map.Current.GetTileFromBody( tr.Body );
+			var tile = Map.Instance.GetTileFromBody( tr.Body );
 			if ( !tile.Flags.HasFlag( TileFlag.Unbreakable ) )
 			{
-				Map.Current.ChangeTile( tile, Tiles.Floor );
+				Map.Instance.ChangeTile( tile, Tiles.Floor );
 				Particles.Create( "particles/wall_break_rocks.vpcf", tile.Position.WithZ( EyePosition.z ) );
+
+				//// TODO: (Navigation) Maybe just AddCell where we break the wall?
+				Map.Instance.ShouldRebuildNav = true;
 			}
 		}
 
