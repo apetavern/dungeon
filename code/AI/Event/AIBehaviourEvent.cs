@@ -2,7 +2,11 @@
 
 public abstract class AIBehaviourEvent
 {
-	public AIBehaviourEvent( AIBehaviour _ ) { }
+	public AIBehaviour Source;
+	public AIBehaviourEvent( AIBehaviour source)
+	{
+		Source = source;
+	}
 }
 
 public sealed class DetectedPlayer : AIBehaviourEvent
