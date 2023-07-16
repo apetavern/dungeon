@@ -31,4 +31,11 @@ public partial class FollowTarget : AIBehaviour
 			targetter.Target = null;
 		}
 	}
+
+	public override void OnControllerEvent( AIBehaviourEvent ev )
+	{
+		base.OnControllerEvent( ev );
+		if ( ev is DetectedPlayer detectedPlayer )
+			detectedPlayer.Source.Enabled = false;
+	}
 }

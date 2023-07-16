@@ -19,7 +19,6 @@ public partial class DetectPlayerInRadius : AIBehaviour
 			targetter.Target = tr.Entity;
 			Controller.RunEvent( new StartedFollowingTarget( this ) );
 			Controller.RunEvent( new DetectedPlayer( this ) );
-			Enabled = false;
 		}
 	}
 
