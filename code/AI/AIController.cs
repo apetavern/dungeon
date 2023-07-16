@@ -75,7 +75,7 @@ public partial class AIController : EntityComponent, ISingletonComponent
 			comp.Tick();
 		}
 
-		if ( TryGetData<TargetData>( out var targetData ) )
+		if ( TryGetData<TargetData>( out var targetData ) && targetData.Target is not null)
 			targetData.Distance = Entity.Position.Distance( targetData.Target.Position );
 	}
 }
