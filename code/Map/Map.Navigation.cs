@@ -30,6 +30,6 @@ partial class Map
 
 	private async void BuildNav()
 	{
-		NavGrid = await Grid.Create( Vector3.Zero, Bounds, Rotation.Identity, cellSize: TileSize / 2.2f, save: false );
+		NavGrid = await Grid.Create( Vector3.Zero, Bounds, Rotation.Identity, cellSize: TileSize / 4, save: false );
 	}
 }
