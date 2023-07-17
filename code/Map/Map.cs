@@ -8,9 +8,11 @@ public partial class Map
 	public static float TileHeight => TileSize;
 	public static float HalfTile => TileSize / 2;
 
-	public static Model FloorModel = Model.Load( "models/floor.vmdl" );
-	public static Model WallModel = Model.Load( "models/wall.vmdl" );
-	public static Model UnbreakableWallModel = Model.Load( "models/wall_unbreakable.vmdl" );
+	public static Model FloorModel = Model.Load( "models/map/floor.vmdl" );
+	public static Model WallModel = Model.Load( "models/map/wall.vmdl" );
+
+	public static Material WallMaterial = Material.Load( "materials/dng_wall.vmat" );
+	public static Material WallUnbreakableMaterial = Material.Load( "materials/dng_wall_unbreakable.vmat" );
 
 	public int Seed { get; private set; }
 	public int Width { get; set; }
@@ -99,7 +101,7 @@ public partial class Map
 		if ( Game.IsClient )
 			return;
 
-		DebugOverlay.Box(Bounds, Color.Yellow );
+		DebugOverlay.Box( Bounds, Color.Yellow );
 	}
 
 	[GameEvent.Client.Frame]

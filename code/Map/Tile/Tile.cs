@@ -53,6 +53,11 @@ public partial class Tile : IDelete
 				tile.Collider.AddBoxShape( default, Rotation.Identity, (Vector3.One * 0.5f) * Map.TileSize );
 			}
 
+			if ( flags.HasFlag( TileFlag.Unbreakable ) )
+			{
+				tile.SceneObject.SetMaterialOverride( Map.WallUnbreakableMaterial );
+			}
+
 			return tile;
 		}
 		catch ( Exception e )
@@ -67,7 +72,7 @@ public partial class Tile : IDelete
 		Tiles.None => Model.Load( "error.vmdl" ),
 		Tiles.Floor => Map.FloorModel,
 		Tiles.Wall => Map.WallModel,
-		Tiles.UnbreakableWall => Map.UnbreakableWallModel,
+		Tiles.UnbreakableWall => Map.WallModel,
 		_ => Model.Load( "error.vmdl" )
 	};
 

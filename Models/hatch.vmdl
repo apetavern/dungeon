@@ -11,7 +11,7 @@
 				[
 					{
 						_class = "RenderMeshFile"
-						filename = "Models\\dmx\\mesh\\hatch.dmx"
+						filename = "Models/Map/hatch.fbx"
 						import_translation = [ 0.0, 0.0, 0.0 ]
 						import_rotation = [ 0.0, 0.0, 0.0 ]
 						import_scale = 1.0
@@ -36,12 +36,12 @@
 						remaps = 
 						[
 							{
-								from = "materials/street/sheet_metal_01a.vmat"
-								to = "materials/buildings/sheet_metal_01a.vmat"
+								from = "wood_hs_01a.vmat"
+								to = "models/sbox_props/low_wood_fence/low_wood_fence.vmat"
 							},
 							{
-								from = "materials/street/wood_hs_01a.vmat"
-								to = "materials/hotspot/wood_hs_01a.vmat"
+								from = "sheet_metal_01a.vmat"
+								to = "materials/cables/cable_metal_wire_a.vmat"
 							},
 						]
 						use_global_default = false
