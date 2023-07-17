@@ -94,7 +94,7 @@
     "LaunchConfigs": [
       {
         "Name": "Dungeon LAN",
-        "GameIdent": "apetavern.dungeon#local",
+        "GameIdent": "null.dungeon#local",
         "MapName": "null.dungeonmap",
         "MaxPlayers": 2,
         "GameSettings": {},
