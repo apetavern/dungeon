@@ -1,7 +1,7 @@
 ﻿namespace Dungeon;
 
 [Prefab]
-public partial class Enemy : ModelEntity
+public partial class Enemy : AnimatedEntity
 {
 	[Prefab] public float StartingHealth { get; set; }
 	[Prefab] public float BoundsSize { get; set; }
