@@ -6,7 +6,24 @@
     "Guid": "ca692ee2-615a-45cb-afbe-788c2057fef4",
     "Class": "Weapon",
     "Entities": [],
-    "Components": [],
+    "Components": [
+      {
+        "Guid": "16e7726e-77d5-497f-8699-62b6dd799c47",
+        "Class": "Melee",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022Melee\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          },
+          "Cooldown": {
+            "Type": "Single",
+            "Value": "0.3"
+          }
+        }
+      }
+    ],
     "Keys": {
       "_name": {
         "Value": "\u0022Crystal Sword\u0022"

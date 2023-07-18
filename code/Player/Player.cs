@@ -8,7 +8,7 @@ public partial class Player : AnimatedEntity
 	[BindComponent]
 	public PlayerController Controller { get; }
 
-	[Net] public Weapon? ActiveWeapon { get; set; }
+	[Net] public Weapon? ActiveWeapon { get; private set; }
 
 	[Net] public int FloorsCleared { get; private set; }
 
@@ -49,6 +49,7 @@ public partial class Player : AnimatedEntity
 	{
 		base.Simulate( cl );
 		Controller?.Simulate( cl );
+		ActiveWeapon?.Simulate( cl );
 
 		if ( Controller.Velocity.WithZ( 0 ).Length > 0 )
 			SinceMoved = 0;
@@ -69,8 +70,6 @@ public partial class Player : AnimatedEntity
 				Map.Instance.ShouldRebuildNav = true;
 			}
 		}
-
-		ActiveWeapon?.Simulate( cl );
 	}
 
 	public override void FrameSimulate( IClient cl )
@@ -91,6 +90,13 @@ public partial class Player : AnimatedEntity
 		Camera.ZNear = 0.5f;
 
 		Camera.Main.SetViewModelCamera( 75 );
+	}
+
+	public void SetActiveWeapon(Weapon weapon )
+	{
+		ActiveWeapon = weapon;
+		weapon.SetParent( this );
+		weapon.Owner = this;
 	}
 
 	[GameEvent.Tick.Client]

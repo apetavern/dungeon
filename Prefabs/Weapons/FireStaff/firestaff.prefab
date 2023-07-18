@@ -8,15 +8,15 @@
     "Entities": [],
     "Components": [
       {
-        "Guid": "9a78f572-d2d9-42c9-aac4-b592f321a408",
-        "Class": "ShootProjectileBehaviour",
+        "Guid": "6c1e5afc-72b7-4ff3-b08c-60c3d166e078",
+        "Class": "ShootProjectile",
         "Keys": {
           "Projectile": {
             "Type": "Prefab",
             "Value": "\u0022prefabs/projectiles/fireball.prefab\u0022"
           },
           "_name": {
-            "Value": "\u0022ShootProjectileBehaviour\u0022"
+            "Value": "\u0022ShootProjectile\u0022"
           },
           "_tags": {}
         }
@@ -35,7 +35,9 @@
       "_scale": {
         "Value": "1"
       },
-      "_tags": {}
+      "_tags": {
+        "Value": "\u0022\u0022"
+      }
     }
   }
 }

@@ -18,8 +18,7 @@ public partial class WeaponPickupController : AnimatedEntity
 		{
 			if ( tr.Entity is Player player && PrefabLibrary.TrySpawn<Weapon>( Weapon.ResourcePath, out var weapon ) )
 			{
-				weapon.SetParent( player );
-				player.ActiveWeapon = weapon;
+				player.SetActiveWeapon( weapon );
 			}
 
 			Delete();

@@ -1,7 +1,7 @@
 ﻿namespace Dungeon;
 
 [Prefab]
-public partial class ShootProjectileBehaviour : WeaponBehaviour
+public partial class ShootProjectile : WeaponBehaviour
 {
 	[Prefab, Net]
 	public Prefab Projectile { get; set; }
@@ -12,11 +12,12 @@ public partial class ShootProjectileBehaviour : WeaponBehaviour
 		if ( Game.IsClient )
 			return;
 
-		if ( Input.Released( "attack2" ) && PrefabLibrary.TrySpawn<Projectile>( Projectile.ResourcePath, out var projectile ) )
+		if ( Input.Released( InputActions.SecondaryAttack )
+			&& PrefabLibrary.TrySpawn<Projectile>( Projectile.ResourcePath, out var projectile ) )
 		{
 			Log.Info( $"Shot a projectile : {projectile}" );
 			projectile.Position = Player.EyePosition + Player.EyeRotation.Forward * 20;
-			projectile.Fire( Player.AimRay.Forward, projectile.DefaultMoveSpeed);
+			projectile.Fire( Player.AimRay.Forward, projectile.DefaultMoveSpeed );
 		}
 	}
 }

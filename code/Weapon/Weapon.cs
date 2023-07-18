@@ -4,7 +4,7 @@
 [Icon( "auto_fix_high" )]
 public partial class Weapon : Entity
 {
-	[Net] public Player Player { get; private set; }
+	public Player Player => Owner as Player;
 
 	public IEnumerable<WeaponBehaviour> Behaviours => Components.GetAll<WeaponBehaviour>( includeDisabled: true );
 
@@ -13,11 +13,13 @@ public partial class Weapon : Entity
 	[Prefab, ResourceType( "vmdl" ), Net]
 	public string ViewmodelPath { get; set; }
 
+	[Prefab]
+	public float BaseDaamge { get; set; } = 10;
+
 	public override void Spawn()
 	{
 		base.Spawn();
 		Transmit = TransmitType.Always;
-		Player = Owner as Player;
 	}
 
 	public override void ClientSpawn()

@@ -20,7 +20,7 @@
 					{
 						m_id = 291851600
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_states = 
 					[
@@ -165,12 +165,12 @@
 				{
 					_class = "CChoiceAnimNode"
 					m_sName = "Unnamed"
-					m_vecPosition = [ -224.0, 128.0 ]
+					m_vecPosition = [ -224.0, 16.0 ]
 					m_nNodeID = 
 					{
 						m_id = 455467708
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_children = 
 					[
@@ -226,12 +226,12 @@
 				{
 					_class = "CSequenceAnimNode"
 					m_sName = "Unnamed"
-					m_vecPosition = [ -224.0, -16.0 ]
+					m_vecPosition = [ -224.0, -32.0 ]
 					m_nNodeID = 
 					{
 						m_id = 457089126
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_tagSpans = [  ]
 					m_sequenceName = "idle"
@@ -248,12 +248,12 @@
 				{
 					_class = "CRootAnimNode"
 					m_sName = "Unnamed"
-					m_vecPosition = [ 176.0, -16.0 ]
+					m_vecPosition = [ 160.0, -16.0 ]
 					m_nNodeID = 
 					{
 						m_id = 935201032
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_inputConnection = 
 					{
@@ -277,12 +277,12 @@
 				{
 					_class = "CSequenceAnimNode"
 					m_sName = "swing2"
-					m_vecPosition = [ -416.0, 176.0 ]
+					m_vecPosition = [ -416.0, 64.0 ]
 					m_nNodeID = 
 					{
 						m_id = 1446808228
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_tagSpans = [  ]
 					m_sequenceName = "swing2"
@@ -299,12 +299,12 @@
 				{
 					_class = "CSequenceAnimNode"
 					m_sName = "swing1"
-					m_vecPosition = [ -416.0, 128.0 ]
+					m_vecPosition = [ -416.0, 16.0 ]
 					m_nNodeID = 
 					{
 						m_id = 1790236582
 					}
-					m_networkMode = "ServerAuthoritative"
+					m_networkMode = "ClientSimulate"
 					m_sNote = ""
 					m_tagSpans = [  ]
 					m_sequenceName = "swing1"
@@ -327,7 +327,7 @@
 					m_id = 1329152296
 				}
 				m_previewButton = "ANIMPARAM_BUTTON_NONE"
-				m_bNetwork = true
+				m_bNetwork = false
 				m_bUseMostRecentValue = false
 				m_bAutoReset = true
 				m_bPredicted = false
