@@ -42,6 +42,8 @@ public partial class Map
 		if ( Game.IsServer )
 		{
 			var ent = new ModelEntity( "models/dev/plane.vmdl" );
+			ent.Tags.Add( Tag.Solid );
+			ent.Tags.Add( Tag.World );
 			ent.EnableDrawing = false;
 			//ent.Position = Vector3.Down * Map.TileSize / 2;
 			float size = 10000;

@@ -1,0 +1,63 @@
+{
+  "SchemaVersion": 1,
+  "Name": null,
+  "Description": null,
+  "Root": {
+    "Guid": "61793d42-a762-4598-9542-920ba8f9065f",
+    "Class": "WeaponPickupController",
+    "Entities": [
+      {
+        "Guid": "1ef95347-e503-48bd-8549-f649f83fb263",
+        "Class": "model_entity",
+        "Entities": [],
+        "Components": [],
+        "Keys": {
+          "Model": {
+            "Type": "Model",
+            "Value": "\u0022models/weapons/sword_crystal.vmdl\u0022"
+          },
+          "_name": {
+            "Value": "\u0022Untitled Entity\u0022"
+          },
+          "_localposition": {
+            "Value": "\u00220,0,16\u0022"
+          },
+          "_localrotation": {
+            "Value": "\u0022-0,0,45\u0022"
+          },
+          "_scale": {
+            "Value": "1"
+          },
+          "_tags": {
+            "Value": "\u0022\u0022"
+          }
+        }
+      }
+    ],
+    "Components": [],
+    "Keys": {
+      "Model": {
+        "Type": "null"
+      },
+      "Weapon": {
+        "Type": "Prefab",
+        "Value": "\u0022prefabs/weapons/crystalsword/crystal_sword.prefab\u0022"
+      },
+      "_name": {
+        "Value": "\u0022CrystalSwordPickup\u0022"
+      },
+      "_localposition": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_localrotation": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_scale": {
+        "Value": "1"
+      },
+      "_tags": {
+        "Value": "\u0022pickup\u0022"
+      }
+    }
+  }
+}

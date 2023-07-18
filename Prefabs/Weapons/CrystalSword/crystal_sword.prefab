@@ -1,0 +1,32 @@
+{
+  "SchemaVersion": 1,
+  "Name": null,
+  "Description": null,
+  "Root": {
+    "Guid": "ca692ee2-615a-45cb-afbe-788c2057fef4",
+    "Class": "Weapon",
+    "Entities": [],
+    "Components": [],
+    "Keys": {
+      "_name": {
+        "Value": "\u0022Crystal Sword\u0022"
+      },
+      "_localposition": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_localrotation": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_scale": {
+        "Value": "1"
+      },
+      "_tags": {
+        "Value": "\u0022\u0022"
+      },
+      "ViewmodelPath": {
+        "Type": "String",
+        "Value": "\u0022models/weapons/v_sword_crystal.vmdl\u0022"
+      }
+    }
+  }
+}

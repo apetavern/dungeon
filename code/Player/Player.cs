@@ -8,7 +8,7 @@ public partial class Player : AnimatedEntity
 	[BindComponent]
 	public PlayerController Controller { get; }
 
-	[Net] public Weapon? ActiveWeapon { get; private set; }
+	[Net] public Weapon? ActiveWeapon { get; set; }
 
 	[Net] public int FloorsCleared { get; private set; }
 
@@ -34,9 +34,6 @@ public partial class Player : AnimatedEntity
 		//RPGLight = new PointLightEntity()
 		//RPGLight.Color = Color.FromRgb( 0xEBDEAB );
 
-		PrefabLibrary.TrySpawn<Weapon>( "prefabs/weapons/firestaff/firestaff.prefab", out var weapon );
-		weapon.Owner = this;
-		ActiveWeapon = weapon;
 		this.SetupCollision( PhysicsMotionType.Keyframed );
 	}
 
@@ -92,6 +89,8 @@ public partial class Player : AnimatedEntity
 		Camera.FieldOfView = Screen.CreateVerticalFieldOfView( 75 );
 		Camera.FirstPersonViewer = this;
 		Camera.ZNear = 0.5f;
+
+		Camera.Main.SetViewModelCamera( 75 );
 	}
 
 	[GameEvent.Tick.Client]
