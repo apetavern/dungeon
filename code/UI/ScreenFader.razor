@@ -5,26 +5,18 @@
 @inherits Panel
 
 @code {
-    TimeUntil Done;
-    float duration;
-    float fadeRate;
-    float opacity = 1.0f;
+    TimeUntil _untilDone;
 
     public ScreenFader(float fadeDuration)
     {
-        duration = fadeDuration;
-        Done = fadeDuration;
-
-        fadeRate = (1 - 0) / (fadeDuration * Game.TickRate);
-        fadeRate /= 2;
-        Style.Opacity = opacity;
+        _untilDone = fadeDuration;
+        Style.Opacity = 1.0f;
     }
 
     public override void Tick()
     {
-        opacity -= fadeRate;
-        Style.Opacity = opacity;
-        if (Done)
+        Style.Opacity = 1.0f - _untilDone.Fraction;
+        if (_untilDone)
             Delete();
     }
 
