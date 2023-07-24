@@ -11,6 +11,7 @@ public static class Tag
 	public static string Entity = "entity";
 	public static string Player = "player";
 	public static string Enemy = "enemy";
+	public static string Interactable = "interactable";
 
 	public static string Pickup = "pickup";
 }

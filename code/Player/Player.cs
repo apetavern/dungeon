@@ -15,6 +15,7 @@ public partial class Player : AnimatedEntity
 	[Net] public TimeSince SinceMoved { get; private set; }
 
 	private PointLightEntity? RPGLight { get; set; }
+	private const float InteractRange = 150f;
 
 	public override void Spawn()
 	{
@@ -48,28 +49,15 @@ public partial class Player : AnimatedEntity
 	public override void Simulate( IClient cl )
 	{
 		base.Simulate( cl );
+
+		if ( Input.Down( InputActions.Interact ) )
+			TryInteract();
+
 		Controller?.Simulate( cl );
 		ActiveWeapon?.Simulate( cl );
 
 		if ( Controller.Velocity.WithZ( 0 ).Length > 0 )
 			SinceMoved = 0;
-
-		if ( Game.IsServer && Input.Pressed( "attack1" ) )
-		{
-			var tr = Trace.Ray( AimRay, 200 ).Ignore( this ).WithTag( Tag.Tile ).Run();
-			if ( tr.Body is null || !tr.Shape.HasTag( Tag.Tile ) )
-				return;
-
-			var tile = Map.Instance.GetTileFromBody( tr.Body );
-			if ( !tile.Flags.HasFlag( TileFlag.Unbreakable ) )
-			{
-				Map.Instance.ChangeTile( tile, Tiles.Floor );
-				Particles.Create( "particles/wall_break_rocks.vpcf", tile.Position.WithZ( EyePosition.z ) );
-
-				//// TODO: (Navigation) Maybe just AddCell where we break the wall?
-				Map.Instance.ShouldRebuildNav = true;
-			}
-		}
 	}
 
 	public override void FrameSimulate( IClient cl )
@@ -92,11 +80,24 @@ public partial class Player : AnimatedEntity
 		Camera.Main.SetViewModelCamera( 75 );
 	}
 
-	public void SetActiveWeapon(Weapon weapon )
+	public void SetActiveWeapon( Weapon weapon )
 	{
 		ActiveWeapon = weapon;
 		weapon.SetParent( this );
 		weapon.Owner = this;
+	}
+
+	private void TryInteract()
+	{
+		var tr = Trace.Ray( AimRay, InteractRange ).Ignore( this ).WithTag( Tag.Interactable ).Run();
+		DebugOverlay.TraceResult( tr );
+		if ( !tr.Hit || !tr.Entity.IsValid() )
+			return;
+
+		if ( !tr.Entity.Components.TryGet<Interaction>( out var interactComp ) )
+			return;
+
+		interactComp.Interact( this );
 	}
 
 	[GameEvent.Tick.Client]

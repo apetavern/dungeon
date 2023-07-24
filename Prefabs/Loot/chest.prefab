@@ -1,0 +1,65 @@
+{
+  "SchemaVersion": 1,
+  "Name": null,
+  "Description": null,
+  "Root": {
+    "Guid": "061158d0-1986-4877-94c1-510970813e68",
+    "Class": "Chest",
+    "Entities": [],
+    "Components": [
+      {
+        "Guid": "83e452a7-f78a-42f8-a87d-e2483188f070",
+        "Class": "ModelPhysicsComponent",
+        "Keys": {
+          "GravityEnabled": {
+            "Type": "Boolean",
+            "Value": "false"
+          },
+          "Keyframe": {
+            "Type": "Boolean",
+            "Value": "true"
+          },
+          "_name": {
+            "Value": "\u0022ModelPhysicsComponent\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      },
+      {
+        "Guid": "416b557c-a8ae-4c8d-84be-8f5aa49f3bcc",
+        "Class": "Interaction",
+        "Keys": {
+          "_name": {
+            "Value": "\u0022Interaction\u0022"
+          },
+          "_tags": {
+            "Value": "[]"
+          }
+        }
+      }
+    ],
+    "Keys": {
+      "Model": {
+        "Type": "Model",
+        "Value": "\u0022models/chests/chest.vmdl\u0022"
+      },
+      "_name": {
+        "Value": "\u0022Chest\u0022"
+      },
+      "_localposition": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_localrotation": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_scale": {
+        "Value": "1"
+      },
+      "_tags": {
+        "Value": "\u0022interactable entity\u0022"
+      }
+    }
+  }
+}
