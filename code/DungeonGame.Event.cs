@@ -9,7 +9,7 @@ partial class DungeonGame
 	{
 		if ( Game.IsClient )
 		{
-			Hud.Instance.Fade(2);
+			Hud.Instance.Fade(5);
 			return;
 		}
 
