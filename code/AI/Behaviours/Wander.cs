@@ -19,8 +19,7 @@ public partial class Wander : AIBehaviour
 		if ( Time.Tick % WanderRate != 0 )
 			return;
 
-
-		if ( Game.Random.Next( 0, WanderChance ) == 1 && Controller.TryGetBehaviour<Pather>( out var pather ) && pather.CurrentPath.Count <= 0 )
+		if ( Game.Random.Next( 0, WanderChance ) == 1 && Controller.TryGetBehaviour<Pather>( out var pather ) && !pather.CurrentPath.IsEmpty )
 		{
 			var randomNearPosition = Entity.Position + (Vector3.Random * WanderRange).WithZ( 0 );
 			var randomNearbyCell = Map.Instance.NavGrid.GetNearestCell( randomNearPosition );

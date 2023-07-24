@@ -37,7 +37,7 @@ public partial class Map
 		Depth = d;
 
 		Seed = DungeonConfig.Seed;
-		Bounds = new BBox( new Vector3( TileSize / 2, TileSize / 2, 0 ), new Vector3( (Width - 1) * TileSize - HalfTile, (Width - 1) * TileSize - HalfTile, TileSize ) );
+		Bounds = new BBox( new Vector3( TileSize / 2, TileSize / 2, -(TileSize / 2) ), new Vector3( (Width - 1) * TileSize - HalfTile, (Width - 1) * TileSize - HalfTile, TileSize - 16 ) );
 
 		if ( Game.IsServer )
 		{
@@ -50,7 +50,7 @@ public partial class Map
 			ent.SetupPhysicsFromAABB( PhysicsMotionType.Static, new Vector3( -size, -size, -0.1f ), new Vector3( size, size, 0.1f ) );
 			Generate();
 
-			SetupNav();
+			BuildNav();
 		}
 
 		Event.Register( this );

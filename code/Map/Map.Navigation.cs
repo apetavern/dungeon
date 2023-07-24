@@ -10,11 +10,6 @@ partial class Map
 
 	public bool ShouldRebuildNav { get; set; }
 
-	private void SetupNav()
-	{
-		BuildNav();
-	}
-
 	[GameEvent.Tick.Server]
 	void OnServerTick()
 	{
@@ -28,8 +23,17 @@ partial class Map
 		}
 	}
 
-	private async void BuildNav()
+	public async void BuildNav()
 	{
-		NavGrid = await Grid.Create( Vector3.Zero, Bounds, Rotation.Identity, cellSize: TileSize / 4, save: false );
+		NavGrid = await new GridBuilder()
+			.WithBounds( Vector3.Zero, Bounds, Rotation.Identity )
+			.WithCellSize( TileSize / 4 )
+			.Create();
+	}
+
+	[ConCmd.Server( "build_nav" )]
+	private static void DebugRebuildNav()
+	{
+		Map.Instance.BuildNav();
 	}
 }
