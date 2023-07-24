@@ -9,7 +9,7 @@ internal sealed class GoBackShaderEffect : RenderHook
 	/// <inheritdoc/>
 	public sealed override void OnStage( SceneCamera target, Stage renderStage )
 	{
-		if ( renderStage != Stage.AfterUI )
+		if ( renderStage != Stage.AfterPostProcess )
 			return;
 
 		Graphics.GrabFrameTexture( "ColorBuffer", attributes );
