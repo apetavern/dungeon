@@ -1,0 +1,60 @@
+{
+  "SchemaVersion": 1,
+  "Name": null,
+  "Description": null,
+  "Root": {
+    "Guid": "984d8f1d-a71b-431a-a299-e2d76ffecfa3",
+    "Class": "WeaponPickupController",
+    "Entities": [
+      {
+        "Guid": "a95d431c-ba77-4fec-bb97-4b9ffaad4678",
+        "Class": "model_entity",
+        "Entities": [],
+        "Components": [],
+        "Keys": {
+          "Model": {
+            "Type": "Model",
+            "Value": "\u0022models/dng_crusher.vmdl\u0022"
+          },
+          "_name": {
+            "Value": "\u0022Untitled Entity\u0022"
+          },
+          "_localposition": {
+            "Value": "\u00220,0,19.50731\u0022"
+          },
+          "_localrotation": {
+            "Value": "\u00220,0,45\u0022"
+          },
+          "_scale": {
+            "Value": "1"
+          },
+          "_tags": {
+            "Value": "\u0022\u0022"
+          }
+        }
+      }
+    ],
+    "Components": [],
+    "Keys": {
+      "_name": {
+        "Value": "\u0022Crusher Pickup\u0022"
+      },
+      "_localposition": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_localrotation": {
+        "Value": "\u00220,0,0\u0022"
+      },
+      "_scale": {
+        "Value": "1"
+      },
+      "_tags": {
+        "Value": "\u0022pickup\u0022"
+      },
+      "Weapon": {
+        "Type": "Prefab",
+        "Value": "\u0022prefabs/weapons/crusher/crusher.prefab\u0022"
+      }
+    }
+  }
+}

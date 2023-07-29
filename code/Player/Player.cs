@@ -82,6 +82,11 @@ public partial class Player : AnimatedEntity
 
 	public void SetActiveWeapon( Weapon weapon )
 	{
+		if ( ActiveWeapon is not null )
+		{
+			ActiveWeapon.Delete();
+		}
+
 		ActiveWeapon = weapon;
 		weapon.SetParent( this );
 		weapon.Owner = this;

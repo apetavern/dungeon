@@ -10,7 +10,7 @@ public partial class Melee : WeaponBehaviour
 		base.Simulate( client );
 		if ( SinceActivated < Cooldown )
 			return;
-		
+
 		if ( Input.Pressed( InputActions.PrimaryAttack ) )
 		{
 			if ( Game.IsServer )

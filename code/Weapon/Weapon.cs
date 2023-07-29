@@ -26,11 +26,32 @@ public partial class Weapon : Entity
 	{
 		base.ClientSpawn();
 
+		Log.Info( "spawned" );
 		ViewmodelEntity = new Viewmodel();
-		ViewmodelEntity.SetModel( ViewmodelPath );
+		ViewmodelEntity.SetModel( "models/weapons/v_dng_weapon.vmdl" );
+
+		// I just bonemerge the weapon model to the viewmodel skeleton and have a single
+		// animgraph for all weapon types.
+		var viewModel = new ModelEntity( ViewmodelPath );
+		viewModel.SetParent( ViewmodelEntity, true );
+		viewModel.EnableViewmodelRendering = true;
+
 		ViewmodelEntity.Owner = Owner;
 		ViewmodelEntity.SetParent( Owner );
 		ViewmodelEntity.EnableViewmodelRendering = true;
+	}
+
+	protected override void OnDestroy()
+	{
+		base.OnDestroy();
+		OnDestroyClient( To.Single( Owner ) );
+	}
+
+	[ClientRpc]
+	private void OnDestroyClient()
+	{
+		Log.Info( "destroyed" );
+		ViewmodelEntity.Delete();
 	}
 
 	public override void Simulate( IClient client )

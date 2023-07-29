@@ -1,5 +1,6 @@
 ﻿namespace Dungeon;
 
+[Prefab]
 public partial class Mining : WeaponBehaviour
 {
 	public override void Simulate( IClient client )
